@@ -1,0 +1,54 @@
+# Ignore all dotfiles by default
+.*
+!.gitignore
+!.gitkeep
+!.github
+!.env.example
+!.npmrc
+
+# Security & Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.priv
+*.keystore
+*.jks
+*.truststore
+*secret*
+*credential*
+*password*
+*apikey*
+config.local.js
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies and build
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

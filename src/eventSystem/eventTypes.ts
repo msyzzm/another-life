@@ -1,0 +1,134 @@
+import type { Character } from '../types/character';
+
+// 事件类型定义
+export type EventType = 'battle' | 'findItem' | 'levelUp' | 'custom';
+
+// 扩展条件类型，增加历史条件支持
+export interface EventCondition {
+  type: 'attribute' | 'item' | 'level' | 'itemCount' | 'custom' 
+      | 'history' | 'streak' | 'cumulative' | 'daysSince' | 'eventCount' | 'chainContext';
+  key: string;
+  operator: '>' | '>=' | '<' | '<=' | '==' | '!=';
+  value: number | string;
+  // 历史条件专用参数
+  historyType?: 'eventTriggered' | 'attributeChange' | 'itemGained' | 'itemLost' | 'dayPassed';
+  timeWindow?: number; // 检查的时间窗口（天数）
+  consecutive?: boolean; // 是否需要连续
+  // 事件链上下文条件专用参数
+  contextPath?: string; // 上下文中的路径，如 'choice.selectedOption'
+}
+
+// 事件链上下文接口
+export interface EventChainContext {
+  chainId: string;
+  step: number;
+  data: { [key: string]: any }; // 可存储任意链上下文数据
+  character?: Partial<Character>; // 角色状态快照
+  timestamp: Date;
+  previousEventId?: string;
+}
+
+// 事件链下一步配置
+export interface ChainNextEvent {
+  eventId: string;
+  probability?: number; // 触发概率，默认1.0
+  conditions?: EventCondition[]; // 额外的触发条件
+  delay?: number; // 延迟天数，0表示立即触发
+  contextUpdate?: { [key: string]: any }; // 传递给下一个事件的上下文更新
+}
+
+// 玩家历史记录接口
+export interface PlayerHistory {
+  characterId: string;
+  dailyRecords: DailyRecord[];
+  eventHistory: EventRecord[];
+  createdAt: Date;
+  lastUpdated: Date;
+}
+
+// 每日记录
+export interface DailyRecord {
+  day: number;
+  events: string[]; // 触发的事件ID列表
+  attributeChanges: AttributeChange[];
+  itemsGained: ItemChange[];
+  itemsLost: ItemChange[];
+  finalStats: { [key: string]: number };
+  timestamp: Date;
+}
+
+// 事件历史记录
+export interface EventRecord {
+  eventId: string;
+  eventName: string;
+  eventType: EventType;
+  day: number;
+  outcomes: string[]; // 结果描述
+  timestamp: Date;
+  chainId?: string; // 所属的事件链ID
+  chainStep?: number; // 在链中的步骤
+}
+
+// 属性变化记录
+export interface AttributeChange {
+  attribute: string;
+  from: number;
+  to: number;
+  change: number;
+}
+
+// 物品变化记录
+export interface ItemChange {
+  itemId: string;
+  itemName: string;
+  quantity: number;
+}
+
+// 扩展事件结果类型，支持链上下文操作
+export interface EventOutcome {
+  type: 'attributeChange' | 'levelChange' | 'itemGain' | 'itemLoss' | 'custom' | 'chainContext';
+  key: string;
+  value: number | string;
+  // 链上下文操作专用参数
+  contextOperation?: 'set' | 'add' | 'remove' | 'append'; // 上下文操作类型
+  contextPath?: string; // 上下文路径，如 'choices.lastDecision'
+}
+
+// 扩展游戏事件接口，添加事件链支持
+export interface GameEvent {
+  id: string;
+  type: EventType;
+  name: string;
+  description: string;
+  conditions?: EventCondition[];
+  conditionLogic?: 'AND' | 'OR'; // 条件逻辑，默认为 AND
+  outcomes: EventOutcome[];
+  probability?: number; // 0-1
+  weight?: number; // 事件权重，用于优先级判断
+  
+  // 事件链相关字段
+  chainId?: string; // 事件链标识符
+  chainStep?: number; // 在链中的步骤（0开始）
+  isChainStart?: boolean; // 是否为链的起始事件
+  isChainEnd?: boolean; // 是否为链的结束事件
+  nextEvents?: ChainNextEvent[]; // 下一步可能的事件列表
+  chainContextKey?: string; // 链上下文存储的key
+  
+  // 链事件特殊配置
+  skipNormalEvents?: boolean; // 当这个链事件触发时，是否跳过其他正常事件
+} 
+
+// 活跃事件链状态
+export interface ActiveEventChain {
+  chainId: string;
+  currentStep: number;
+  context: EventChainContext;
+  nextScheduledEvents: Array<{
+    eventId: string;
+    scheduledDay: number;
+    conditions?: EventCondition[];
+    contextUpdate?: { [key: string]: any };
+  }>;
+  startDay: number;
+  isComplete: boolean;
+} 
