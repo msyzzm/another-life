@@ -319,7 +319,7 @@ function App() {
         message,
         // 根据消息内容自动分类日志类型
         type: message.includes('🎉') ? 'system' :           // 升级等系统消息
-              message.includes('问题') ? 'error' :            // 错误消息
+              //message.includes('问题') ? 'error' :            // 错误消息
               message.includes('天开始') || message.includes('天结束') ? 'system' : 'event',  // 普通事件
         timestamp
       }));

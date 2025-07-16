@@ -4,6 +4,7 @@ import type { Inventory } from '../types/inventory';
 import { processBatchOutcomes, validateOutcomePrerequisites } from './outcomeProcessor';
 import { HistoryManager } from './historyManager';
 import { eventChainManager } from './eventChainManager';
+import { eventLibrary } from './events/index';
 import { 
   withErrorHandling, 
   defaultErrorHandler, 
@@ -489,10 +490,10 @@ export const triggerEventsBatch = withErrorHandling(
       let triggeredCount = 0;
       
       for (const scheduledEvent of scheduledChainEvents) {
-        const chainEvent = events.find(e => e.id === scheduledEvent.eventId);
+        const chainEvent = eventLibrary.find(e => e.id === scheduledEvent.eventId);
         if (!chainEvent) {
-          console.warn(`🔗 调度的链事件未找到: ${scheduledEvent.eventId}, 可用事件数量: ${events.length}`);
-          console.warn(`🔗 前10个可用事件ID:`, events.slice(0, 10).map(e => e.id));
+          console.warn(`🔗 调度的链事件未找到: ${scheduledEvent.eventId}, 事件库总数量: ${eventLibrary.length}`);
+          console.warn(`🔗 事件库前10个事件ID:`, eventLibrary.slice(0, 10).map(e => e.id));
           continue;
         } else {
           console.log(`🔗 找到调度的链事件: ${chainEvent.name} (${chainEvent.id})`);
