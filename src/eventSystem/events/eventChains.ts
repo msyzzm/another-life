@@ -78,13 +78,13 @@ export const mysteriousMerchantChain: GameEvent[] = [
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_choice', // 下一个事件的ID
-        delay: 1,                             // 立即触发（同一天）
+        delay: 0,                             // 立即触发（同一天）
         probability: 1.0                      // 100%触发概率
       }
     ],
     
     // 基础事件属性
-    probability: 0.1,  // 10%的触发概率（稀有事件）
+    probability: 1,  // 10%的触发概率（稀有事件）
     weight: 5          // 较高的权重，优先级高
   },
   
@@ -109,21 +109,21 @@ export const mysteriousMerchantChain: GameEvent[] = [
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_buy',
-        delay: 1,
+        delay: 0,
         conditions: [
           { type: 'chainContext', key: 'choice', operator: '==', value: 'buy' }
         ]
       },
       {
         eventId: 'mysteriousMerchant_wisdom',
-        delay: 1,
+        delay: 0,
         conditions: [
           { type: 'chainContext', key: 'choice', operator: '==', value: 'ask' }
         ]
       },
       {
         eventId: 'mysteriousMerchant_leave',
-        delay: 1,
+        delay: 0,
         conditions: [
           { type: 'chainContext', key: 'choice', operator: '==', value: 'leave' }
         ]

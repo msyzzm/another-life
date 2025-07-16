@@ -416,7 +416,48 @@ export const tryTriggerEvent = withErrorHandling(
       
       // 步骤4：应用事件结果到角色和背包
       // 这包括属性变化、物品获得/失去、装备变化等
-      const result = applyEventOutcome(event, character, inventory, currentChainId);
+      let result = applyEventOutcome(event, character, inventory, currentChainId);
+      
+      // 步骤5：处理立即触发的链事件 (delay: 0)
+      // 如果是事件链起始事件且有 delay: 0 的后续事件，立即处理
+      if (event.isChainStart && event.nextEvents && historyManager) {
+        const immediateEvents = event.nextEvents.filter(nextEvent => (nextEvent.delay || 0) === 0);
+        
+        for (const immediateEvent of immediateEvents) {
+          const nextEvent = eventLibrary.find(e => e.id === immediateEvent.eventId);
+          if (!nextEvent) {
+            console.warn(`🔗 立即触发的链事件未找到: ${immediateEvent.eventId}`);
+            continue;
+          }
+          
+          console.log(`🔗 立即触发链事件: ${nextEvent.name} (${nextEvent.id})`);
+          
+          try {
+            // 应用可能的上下文更新
+            if (immediateEvent.contextUpdate && currentChainId) {
+              eventChainManager.updateChainContext(currentChainId, immediateEvent.contextUpdate);
+            }
+            
+            // 立即触发后续事件
+            const immediateResult = tryTriggerEvent(
+              nextEvent,
+              result.character,
+              result.inventory,
+              historyManager,
+              currentChainId,
+              currentDay
+            );
+            
+            if (immediateResult.triggered && immediateResult.result) {
+              // 更新结果为最新状态
+              result = immediateResult.result;
+              console.log(`🔗 立即触发成功: ${nextEvent.name}`);
+            }
+          } catch (error: any) {
+            console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
+          }
+        }
+      }
       
       // 返回成功触发的结果
       return { 
