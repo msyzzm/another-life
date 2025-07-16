@@ -1,0 +1,82 @@
+{
+    "git.enableSmartCommit": true,
+    "git.suggestSmartCommit": true,
+    "git.confirmSync": true,
+    "git.autofetch": true,
+    "git.countBadge": "all",
+    "git.inputValidation": true,
+    "git.branchPrefix": "feature/",
+    "git.defaultCommitMessagePrefix": "chore: ",
+    "git.scmInputEnableConfig": {
+        "commit": true,
+        "commitLength": 50,
+        "commitValidation": false
+    },
+    // 使用中文的提交信息模板
+    "git.commitTemplate": "类型: ${message}\n\n问题描述:\n- \n\n解决方案:\n- \n\n备注:\n- ",
+    // 自定义提交消息类型
+    "git.inputValidationSubjectLength": 100,
+    "git.inputValidationLength": 2000,
+    "git.postCommitCommand": "sync",
+    // 自定义提交类型
+    "conventionalCommits.scopes": [
+        "文档",
+        "功能",
+        "修复",
+        "样式",
+        "重构",
+        "性能",
+        "测试",
+        "构建",
+        "部署",
+        "其他"
+    ],
+    // 提交类型描述（中文）
+    "conventionalCommits.gitmoji": false,
+    "conventionalCommits.promptBody": true,
+    "conventionalCommits.promptFooter": false,
+    "conventionalCommits.promptScopes": true,
+    // 自定义提交类型说明
+    "conventionalCommits.types": {
+        "feat": {
+            "description": "新功能",
+            "title": "功能"
+        },
+        "fix": {
+            "description": "修复缺陷",
+            "title": "修复"
+        },
+        "docs": {
+            "description": "文档更新",
+            "title": "文档"
+        },
+        "style": {
+            "description": "代码格式（不影响功能）",
+            "title": "样式"
+        },
+        "refactor": {
+            "description": "代码重构",
+            "title": "重构"
+        },
+        "perf": {
+            "description": "性能优化",
+            "title": "性能"
+        },
+        "test": {
+            "description": "测试相关",
+            "title": "测试"
+        },
+        "build": {
+            "description": "构建相关",
+            "title": "构建"
+        },
+        "ci": {
+            "description": "持续集成",
+            "title": "部署"
+        },
+        "chore": {
+            "description": "其他修改",
+            "title": "其他"
+        }
+    }
+}

@@ -5,6 +5,7 @@
 !.github
 !.env.example
 !.npmrc
+!.vscode/settings.json
 
 # Security & Secrets
 *.pem
