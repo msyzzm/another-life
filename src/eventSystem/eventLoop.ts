@@ -240,6 +240,7 @@ export async function runAdvancedEventLoop(
     guaranteeEvent?: boolean;
     eventTypeFilter?: string[];
     historyManager?: HistoryManager; // 添加 historyManager 参数
+    forceEvents?: GameEvent[]; // 添加强制事件参数
   } = {}
 ): Promise<{
   character: Character;
@@ -259,7 +260,8 @@ export async function runAdvancedEventLoop(
     useWeights = true,       // 启用权重排序，确保重要事件优先
     guaranteeEvent = true,   // 保证每天至少有一个事件，避免无聊的空白天
     eventTypeFilter,         // 可选的事件类型过滤器
-    historyManager           // 历史记录管理器，用于历史感知事件
+    historyManager,          // 历史记录管理器，用于历史感知事件
+    forceEvents              // 强制触发的事件列表
   } = options;
   
   // 初始化错误收集数组和结果数组
@@ -278,16 +280,25 @@ export async function runAdvancedEventLoop(
       throw new Error('事件库未正确加载或为空');
     }
 
-    // 步骤2：从事件库中筛选出所有可触发的事件
-    // 这里会检查每个事件的触发条件，包括：
-    // - 属性要求（如力量 >= 5）
-    // - 物品要求（如拥有特定物品）
-    // - 等级要求
-    // - 历史条件（如之前发生过某事件）
-    // - 事件链条件等
-    let triggerableEvents = eventLibrary.filter(event =>
-      canTriggerEvent(event, finalCharacter, finalInventory, historyManager)
-    );
+    // 步骤2：处理强制事件或从事件库中筛选可触发事件
+    let triggerableEvents: GameEvent[];
+    
+    if (forceEvents && forceEvents.length > 0) {
+      // 调试模式：使用强制指定的事件
+      console.log(`🔧 调试模式：强制使用 ${forceEvents.length} 个指定事件`);
+      triggerableEvents = forceEvents;
+    } else {
+      // 正常模式：从事件库中筛选出所有可触发的事件
+      // 这里会检查每个事件的触发条件，包括：
+      // - 属性要求（如力量 >= 5）
+      // - 物品要求（如拥有特定物品）
+      // - 等级要求
+      // - 历史条件（如之前发生过某事件）
+      // - 事件链条件等
+      triggerableEvents = eventLibrary.filter(event =>
+        canTriggerEvent(event, finalCharacter, finalInventory, historyManager)
+      );
+    }
 
     // 步骤3：应用事件类型过滤器（如果提供）
     // 允许限制只触发特定类型的事件，用于特殊场景
@@ -298,16 +309,24 @@ export async function runAdvancedEventLoop(
     }
 
     // 步骤4：概率预筛选 - 在选择前先进行概率检查，增加随机性
-    triggerableEvents = triggerableEvents.filter(event => {
-      if (!event) return false;
-      const probability = event.probability !== undefined ? event.probability : 1;
-      return Math.random() <= probability;
-    });
+    // 强制事件跳过概率检查
+    if (!forceEvents || forceEvents.length === 0) {
+      triggerableEvents = triggerableEvents.filter(event => {
+        if (!event) return false;
+        const probability = event.probability !== undefined ? event.probability : 1;
+        return Math.random() <= probability;
+      });
+    }
 
     // 步骤5：智能事件选择 - 使用加权随机选择替代固定排序
     console.log(`🔍 筛选可触发事件: ${triggerableEvents.length} 个事件符合条件`);
     let eventsToTrigger: GameEvent[] = [];
-    if (useWeights && triggerableEvents.length > 0) {
+    
+    if (forceEvents && forceEvents.length > 0) {
+      // 调试模式：直接使用强制事件
+      eventsToTrigger = triggerableEvents.slice(0, maxEvents);
+      console.log(`🔧 调试模式：直接触发 ${eventsToTrigger.length} 个强制事件`);
+    } else if (useWeights && triggerableEvents.length > 0) {
       // 使用加权随机选择，既考虑权重又保持随机性
       eventsToTrigger = selectEventsWithWeightedRandom(
         triggerableEvents, 

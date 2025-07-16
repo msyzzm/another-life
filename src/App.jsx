@@ -4,6 +4,7 @@ import './App.css';
 // 导入数据模型和事件系统
 import { runAdvancedEventLoop } from './eventSystem/eventLoop';
 import { HistoryManager } from './eventSystem/historyManager'; // 导入 HistoryManager
+import { eventLibrary } from './eventSystem/events/index'; // 导入事件库
 
 // 导入数据管理器
 import { DataModelManager } from './utils/dataModelManager';
@@ -71,6 +72,10 @@ function App() {
   const [isProcessingQueue, setIsProcessingQueue] = useState(false); // 队列处理状态
   const [autoRunStartTime, setAutoRunStartTime] = useState(null); // 开始时间
   const [autoRunState, setAutoRunState] = useState('stopped'); // 状态：stopped, starting, running, stopping
+  
+  // 调试相关状态
+  const [debugEventName, setDebugEventName] = useState(''); // 调试事件名称
+  const [isDebugMode, setIsDebugMode] = useState(false); // 是否启用调试模式
   
   const { handleError } = useErrorHandler();
 
@@ -214,7 +219,8 @@ function App() {
     currentAddLogEntry,
     currentSetCharacter,
     currentSetInventory,
-    currentSetGameLog
+    currentSetGameLog,
+    forceEventName = null // 新增参数：强制触发的事件名称
   ) => {
     // 数据有效性检查 - 确保必要的游戏数据存在
     if (!currentChar || !currentInventory) return;
@@ -228,18 +234,49 @@ function App() {
       // 记录新一天的开始
       newLogEntries.push(`第 ${currentChar.daysLived + 1} 天开始...`);
 
-      // 调用高级事件循环系统 - 这是事件处理的核心
-      // 配置参数说明：
-      // - maxEvents: 3 (每天最多触发3个事件)
-      // - useWeights: true (使用权重排序事件优先级)
-      // - guaranteeEvent: true (保证至少触发一个事件)
-      // - historyManager: 历史记录管理器，用于历史感知事件
-      const loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
-        maxEvents: 3,
-        useWeights: true,
-        guaranteeEvent: true,
-        historyManager: currentHistoryManager
-      });
+      // 调试模式：强制触发指定事件
+      let loopResult;
+      if (forceEventName && forceEventName.trim()) {
+        // 在事件库中查找指定名称的事件
+        const targetEvent = eventLibrary.find(event => 
+          event.name === forceEventName.trim() || event.id === forceEventName.trim()
+        );
+        
+        if (targetEvent) {
+          newLogEntries.push(`🔧 调试模式：强制触发事件 "${targetEvent.name}"`);
+          
+          // 创建只包含目标事件的事件循环
+          loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
+            maxEvents: 1,
+            useWeights: false,
+            guaranteeEvent: true,
+            historyManager: currentHistoryManager,
+            forceEvents: [targetEvent] // 强制触发指定事件
+          });
+        } else {
+          newLogEntries.push(`❌ 调试模式：未找到名称为 "${forceEventName}" 的事件`);
+          // 如果找不到指定事件，执行正常的事件循环
+          loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
+            maxEvents: 3,
+            useWeights: true,
+            guaranteeEvent: true,
+            historyManager: currentHistoryManager
+          });
+        }
+      } else {
+        // 正常模式：调用高级事件循环系统
+        // 配置参数说明：
+        // - maxEvents: 3 (每天最多触发3个事件)
+        // - useWeights: true (使用权重排序事件优先级)
+        // - guaranteeEvent: true (保证至少触发一个事件)
+        // - historyManager: 历史记录管理器，用于历史感知事件
+        loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
+          maxEvents: 3,
+          useWeights: true,
+          guaranteeEvent: true,
+          historyManager: currentHistoryManager
+        });
+      }
 
       // 处理事件循环的结果，生成用户可读的日志
       loopResult.results.forEach(result => {
@@ -333,6 +370,7 @@ function App() {
     try {
       // 调用核心事件处理逻辑
       // 传递所有必要的状态和函数，保持函数的纯净性
+      const forceEventName = isDebugMode && debugEventName ? debugEventName : null;
       await triggerNextDayLogic(
         character,           // 当前角色状态
         inventory,           // 当前背包状态
@@ -341,7 +379,8 @@ function App() {
         addLogEntry,         // 日志记录函数
         setCharacter,        // 角色状态更新函数
         setInventory,        // 背包状态更新函数
-        setGameLog           // 游戏日志更新函数
+        setGameLog,          // 游戏日志更新函数
+        forceEventName       // 强制触发的事件名称
       );
     } catch (error) {
       // 捕获并处理顶层执行错误
@@ -358,7 +397,9 @@ function App() {
     setCharacter,           // 状态更新函数
     setInventory,           // 状态更新函数
     setGameLog,             // 日志更新函数
-    triggerNextDayLogic     // 核心逻辑函数
+    triggerNextDayLogic,    // 核心逻辑函数
+    isDebugMode,            // 调试模式状态
+    debugEventName          // 调试事件名称
   ]);
 
   // 手动保存（增强错误处理）
@@ -1023,11 +1064,45 @@ function App() {
         {/* 游戏日志面板 */}
         {gameLogPanel}
 
-        {/* 调试信息 */}
+        {/* 调试面板 */}
         <section className="debug-panel">
-          <h2>调试信息</h2>
+          <h2>调试面板</h2>
+          
+          <div className="debug-controls">
+            <div className="debug-mode-toggle">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isDebugMode}
+                  onChange={(e) => setIsDebugMode(e.target.checked)}
+                />
+                启用调试模式
+              </label>
+            </div>
+            
+            {isDebugMode && (
+              <div className="debug-event-input">
+                <label htmlFor="debug-event-name">强制触发事件:</label>
+                <input
+                  id="debug-event-name"
+                  type="text"
+                  value={debugEventName}
+                  onChange={(e) => setDebugEventName(e.target.value)}
+                  placeholder="输入事件名称或ID"
+                  disabled={isLoading || autoRunState === 'running'}
+                />
+                <small>
+                  提示：输入事件的名称或ID，点击"下一天"时将强制触发该事件
+                </small>
+              </div>
+            )}
+          </div>
+          
           {systemHealth && (
-            <p>系统状态: {systemHealth.status}</p>
+            <div className="debug-system-info">
+              <h3>系统信息</h3>
+              <p>系统状态: {systemHealth.status}</p>
+            </div>
           )}
         </section>
       </main>
