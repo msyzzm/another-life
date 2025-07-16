@@ -221,7 +221,6 @@ export function migrateCharacterData(oldData: any): Character {
     id: oldData.id || 'char-' + Date.now(),
     name: oldData.name || '未命名角色',
     level: oldData.level || 1,
-    profession: oldData.profession || '战士',
     daysLived: oldData.daysLived || 0,
     stats: {
       strength: oldData.stats?.strength || 5,
@@ -368,7 +367,7 @@ export class DataModelManager {
   // 保存所有数据
   saveAll(character?: Character, inventory?: Inventory, eventLog?: EventLog): boolean {
     try {
-      console.log('[[DEBUG]] saveAll: character:', character, 'inventory:', inventory, 'eventLog:', eventLog);
+      // console.log('[[DEBUG]] saveAll: character:', character, 'inventory:', inventory, 'eventLog:', eventLog);
       if (character) {
         if (!validateCharacter(character)) {
           throw new Error('角色数据验证失败');
