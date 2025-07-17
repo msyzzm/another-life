@@ -126,7 +126,6 @@ export interface ActiveEventChain {
   nextScheduledEvents: Array<{
     eventId: string;
     scheduledDay: number;
-    conditions?: EventCondition[];
     contextUpdate?: { [key: string]: any };
   }>;
   startDay: number;

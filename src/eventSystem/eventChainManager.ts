@@ -167,14 +167,12 @@ export class EventChainManager {
     chainId: string;
     eventId: string;
     context: EventChainContext;
-    conditions?: EventCondition[];
     contextUpdate?: { [key: string]: any };
   }> {
     const scheduledEvents: Array<{
       chainId: string;
       eventId: string;
       context: EventChainContext;
-      conditions?: EventCondition[];
       contextUpdate?: { [key: string]: any };
     }> = [];
     
@@ -190,7 +188,6 @@ export class EventChainManager {
           chainId,
           eventId: scheduledEvent.eventId,
           context: chain.context,
-          conditions: scheduledEvent.conditions,
           contextUpdate: scheduledEvent.contextUpdate
         });
       }
@@ -353,7 +350,6 @@ export class EventChainManager {
       chain.nextScheduledEvents.push({
         eventId: nextEvent.eventId,
         scheduledDay,
-        conditions: nextEvent.conditions,
         contextUpdate: nextEvent.contextUpdate
       });
       

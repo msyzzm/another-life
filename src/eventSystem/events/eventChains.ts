@@ -97,10 +97,7 @@ export const mysteriousMerchantChain: GameEvent[] = [
       { type: 'chainContext', key: 'merchantMet', operator: '==', value: 'true' }
     ],
     outcomes: [
-      // 这里可以根据玩家选择设置不同的上下文
-      { type: 'chainContext', key: 'choice', value: 'buy', contextOperation: 'set' },
-      { type: 'chainContext', key: 'choice', value: 'ask', contextOperation: 'set' },
-      { type: 'chainContext', key: 'choice', value: 'leave', contextOperation: 'set' }
+      
     ],
     
     // 事件链字段
@@ -110,23 +107,14 @@ export const mysteriousMerchantChain: GameEvent[] = [
       {
         eventId: 'mysteriousMerchant_buy',
         delay: 0,
-        conditions: [
-          { type: 'chainContext', key: 'choice', operator: '==', value: 'buy' }
-        ]
       },
       {
         eventId: 'mysteriousMerchant_wisdom',
         delay: 0,
-        conditions: [
-          { type: 'chainContext', key: 'choice', operator: '==', value: 'ask' }
-        ]
       },
       {
         eventId: 'mysteriousMerchant_leave',
         delay: 0,
-        conditions: [
-          { type: 'chainContext', key: 'choice', operator: '==', value: 'leave' }
-        ]
       }
     ]
   },
@@ -179,9 +167,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
         eventId: 'mysteriousMerchant_bonus',
         delay: 3,
         probability: 1.0,
-        conditions: [
-          { type: 'chainContext', key: 'merchantWisdom', operator: '==', value: 'true' }
-        ]
       }
     ]
   },
@@ -296,9 +281,6 @@ export const dragonLairChain: GameEvent[] = [
       {
         eventId: 'dragonLair_treasure',
         delay: 0,
-        conditions: [
-          { type: 'chainContext', key: 'approach', operator: '==', value: 'enter' }
-        ]
       }
     ]
   },
