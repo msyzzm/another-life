@@ -18,6 +18,8 @@ export interface EventTriggerResult {
   triggered: boolean;
   logs?: string[];
   error?: string;
+  result?: { character: Character; inventory: Inventory; logs: string[] };
+  chainContext?: any;
 }
 
 export interface EventLoopResult {
@@ -380,6 +382,12 @@ export async function runAdvancedEventLoop(
         currentCharacterState = eventResult.result.character;
         currentInventoryState = eventResult.result.inventory;
         allLogsFromBatch.push(...eventResult.result.logs);
+        
+        // 确保每个事件结果都包含其详细日志
+        return {
+          ...eventResult,
+          logs: eventResult.result.logs // 将详细日志添加到事件结果中
+        };
       }
       if (eventResult.error) {
         errorsFromBatch.push(eventResult.error);

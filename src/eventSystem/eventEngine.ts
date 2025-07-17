@@ -549,13 +549,13 @@ function processImmediateChainEvents(
 
         // 检查事件是否可以触发
         if (!canTriggerEvent(nextEvent, currentResult.character, currentResult.inventory, historyManager, chainId)) {
-          console.log(`🔗 立即触发事件条件不满足: ${nextEvent.name}`);
+          // console.log(`🔗 立即触发事件条件不满足: ${nextEvent.name}`);
           // 记录未触发的链事件
-          triggeredChainEvents.push({
-            event: nextEvent,
-            triggered: false,
-            error: '事件条件不满足'
-          });
+          // triggeredChainEvents.push({
+          //   event: nextEvent,
+          //   triggered: false,
+          //   error: '事件条件不满足'
+          // });
           continue;
         }
 
@@ -612,13 +612,13 @@ function processImmediateChainEvents(
         }
 
       } catch (error: any) {
-        console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
-        // 记录失败的链事件
-        triggeredChainEvents.push({
-          event: nextEvent,
-          triggered: false,
-          error: error.message
-        });
+        // console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
+        // // 记录失败的链事件
+        // triggeredChainEvents.push({
+        //   event: nextEvent,
+        //   triggered: false,
+        //   error: error.message
+        // });
       }
     }
   }

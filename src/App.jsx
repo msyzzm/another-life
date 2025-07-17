@@ -282,12 +282,18 @@ function App() {
       loopResult.results.forEach(result => {
         if (result.triggered) {
           // 记录成功触发的事件
-          newLogEntries.push(`触发事件: ${result.event.name} - ${result.event.description}`);
+          newLogEntries.push(`${result.event.description}`);
 
           // 添加事件产生的详细日志（如属性变化、物品获得等）
-          if (result.logs) {
-            result.logs.forEach(log => newLogEntries.push(log));
+          if (result.logs && result.logs.length > 0) {
+            result.logs.forEach(log => {
+              // 为详细日志添加缩进，使其更易区分
+              newLogEntries.push(`┌ ${log}`);
+            });
           }
+        } else if (result.error) {
+          // 记录失败的事件
+          // newLogEntries.push(`❌ 事件失败: ${result.event.name} - ${result.error}`);
         }
       });
 
