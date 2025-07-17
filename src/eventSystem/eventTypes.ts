@@ -134,6 +134,10 @@ export interface GameEvent {
   probability?: number; // 0-1
   weight?: number; // 事件权重，用于优先级判断
   
+  // 图片相关字段
+  imageUrl?: string; // 事件图片地址，支持本地路径和网络URL
+  imageAlt?: string; // 图片替代文本，用于无障碍访问
+  
   // 事件链相关字段
   chainId?: string; // 事件链标识符
   chainStep?: number; // 在链中的步骤（0开始）

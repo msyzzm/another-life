@@ -281,19 +281,32 @@ function App() {
       // 处理事件循环的结果，生成用户可读的日志
       loopResult.results.forEach(result => {
         if (result.triggered) {
-          // 记录成功触发的事件
-          newLogEntries.push(`${result.event.description}`);
+          // 记录成功触发的事件，包含图片信息
+          newLogEntries.push({
+            type: 'event',
+            message: `${result.event.description}`,
+            imageUrl: result.event.imageUrl,
+            imageAlt: result.event.imageAlt || result.event.name,
+            eventName: result.event.name
+          });
 
           // 添加事件产生的详细日志（如属性变化、物品获得等）
           if (result.logs && result.logs.length > 0) {
             result.logs.forEach(log => {
               // 为详细日志添加缩进，使其更易区分
-              newLogEntries.push(`┌ ${log}`);
+              newLogEntries.push({
+                type: 'detail',
+                message: `  · ${log}`
+              });
             });
           }
         } else if (result.error) {
           // 记录失败的事件
-          // newLogEntries.push(`❌ 事件失败: ${result.event.name} - ${result.error}`);
+          // newLogEntries.push({
+          //   type: 'error',
+          //   message: `❌ 事件失败: ${result.event.name} - ${result.error}`,
+          //   eventName: result.event.name
+          // });
         }
       });
 
@@ -320,15 +333,29 @@ function App() {
       const reversedLogEntries = [...newLogEntries].reverse();
 
       // 格式化日志条目，添加类型标识用于UI样式
-      const logEntries = reversedLogEntries.map((message, index) => ({
-        id: `${Date.now()}-${index}`,  // 唯一标识符
-        message,
-        // 根据消息内容自动分类日志类型
-        type: message.includes('🎉') ? 'system' :           // 升级等系统消息
-              //message.includes('问题') ? 'error' :            // 错误消息
-              message.includes('天开始') || message.includes('天结束') ? 'system' : 'event',  // 普通事件
-        timestamp
-      }));
+      const logEntries = reversedLogEntries.map((entry, index) => {
+        // 处理新的对象格式和旧的字符串格式
+        if (typeof entry === 'object' && entry !== null) {
+          return {
+            id: `${Date.now()}-${index}`,
+            message: entry.message,
+            type: entry.type || 'event',
+            timestamp,
+            imageUrl: entry.imageUrl,
+            imageAlt: entry.imageAlt,
+            eventName: entry.eventName
+          };
+        } else {
+          // 兼容旧的字符串格式
+          return {
+            id: `${Date.now()}-${index}`,
+            message: entry,
+            type: entry.includes('🎉') ? 'system' :
+                  entry.includes('天开始') || entry.includes('天结束') ? 'system' : 'event',
+            timestamp
+          };
+        }
+      });
 
       // 更新游戏日志显示，保持最多50条记录
       currentSetGameLog(prevLog => [...logEntries, ...prevLog.slice(0, 50 - logEntries.length)]);
@@ -856,8 +883,29 @@ function App() {
         ) : (
           gameLog.map((entry, index) => (
             <div key={`${entry.id}-${index}`} className={`log-entry ${entry.type}`}>
-              <span className="log-time">[{entry.timestamp}]</span>
-              <span className="log-message">{entry.message}</span>
+              <div className="log-header">
+                <span className="log-time">[{entry.timestamp}]</span>
+                <span className="log-message">{entry.message}</span>
+              </div>
+              {entry.imageUrl && entry.type === 'event' && (
+                <div className="log-image-container">
+                  <img 
+                    src={entry.imageUrl} 
+                    alt={entry.imageAlt || entry.eventName || '事件图片'}
+                    className="log-event-image"
+                    onError={(e) => {
+                      // 图片加载失败时隐藏图片容器
+                      e.target.style.display = 'none';
+                      console.warn(`事件图片加载失败: ${entry.imageUrl}`);
+                    }}
+                    onLoad={(e) => {
+                      // 图片加载成功时确保显示
+                      e.target.style.display = 'block';
+                    }}
+                  />
+                  <span className="image-caption">{entry.eventName}</span>
+                </div>
+              )}
             </div>
           ))
         )}

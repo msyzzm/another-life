@@ -13,6 +13,8 @@ export const randomEvents: GameEvent[] = [
     type: 'custom',
     name: '随机训练',
     description: '你进行了一次训练，效果因人而异',
+    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop',
+    imageAlt: '训练场景',
     conditions: [
       { type: 'attribute', key: 'stamina', operator: '>=', value: 3 }
     ],
@@ -31,6 +33,8 @@ export const randomEvents: GameEvent[] = [
     type: 'findItem',
     name: '神秘宝箱',
     description: '你发现了一个神秘的宝箱，里面可能有各种宝物',
+    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    imageAlt: '神秘宝箱',
     conditions: [
       { type: 'attribute', key: 'intelligence', operator: '>=', value: 5 }
     ],
@@ -99,6 +103,8 @@ export const randomEvents: GameEvent[] = [
     type: 'battle',
     name: '随机遭遇',
     description: '你遇到了一个神秘的存在，结果完全随机',
+    imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop',
+    imageAlt: '神秘遭遇',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 2 }
     ],
@@ -161,6 +167,8 @@ export const randomEvents: GameEvent[] = [
     type: 'custom',
     name: '天气影响',
     description: '今天的天气对你产生了随机影响',
+    imageUrl: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=400&h=300&fit=crop',
+    imageAlt: '天气变化',
     conditions: [],
     outcomes: [
       // 基于概率的多种可能结果
@@ -189,6 +197,22 @@ export const randomEvents: GameEvent[] = [
     ],
     probability: 0.5,
     weight: 2
+  },
+
+  // 示例：使用本地图片的事件
+  {
+    id: 'local_image_example',
+    type: 'custom',
+    name: '本地图片示例',
+    description: '这是一个展示如何使用本地图片的示例事件',
+    imageUrl: '/src/assets/react.svg', // 使用项目内的图片
+    imageAlt: 'React Logo',
+    conditions: [],
+    outcomes: [
+      OutcomeFactory.attributeChange('intelligence', 1)
+    ],
+    probability: 0.1,
+    weight: 1
   }
 ];
 
