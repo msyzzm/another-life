@@ -3,7 +3,8 @@
  * 提供便捷的结果创建方法，简化事件定义过程
  */
 
-import type { EventOutcome } from './eventTypes';
+import type { EventOutcome, RandomValueConfig } from './eventTypes';
+import { RandomOutcomeFactory } from './randomProcessor';
 
 export class OutcomeFactory {
   /**
@@ -58,6 +59,81 @@ export class OutcomeFactory {
       type: 'custom',
       key,
       value
+    };
+  }
+
+  // === 随机结果创建方法 ===
+
+  /**
+   * 创建随机范围属性变化
+   */
+  static randomAttributeChange(attribute: string, min: number, max: number, allowFloat: boolean = false): EventOutcome {
+    return {
+      type: 'attributeChange',
+      key: attribute,
+      random: RandomOutcomeFactory.range(min, max, allowFloat)
+    };
+  }
+
+  /**
+   * 创建随机数量物品获得
+   */
+  static randomItemGain(itemId: string, min: number, max: number): EventOutcome {
+    return {
+      type: 'itemGain',
+      key: itemId,
+      random: RandomOutcomeFactory.range(min, max)
+    };
+  }
+
+  /**
+   * 创建随机选择属性变化
+   */
+  static choiceAttributeChange(attribute: string, choices: number[]): EventOutcome {
+    return {
+      type: 'attributeChange',
+      key: attribute,
+      random: RandomOutcomeFactory.choice(choices)
+    };
+  }
+
+  /**
+   * 创建权重随机属性变化
+   */
+  static weightedAttributeChange(attribute: string, weightedChoices: Array<{ value: number; weight: number }>): EventOutcome {
+    return {
+      type: 'attributeChange',
+      key: attribute,
+      random: RandomOutcomeFactory.weighted(weightedChoices)
+    };
+  }
+
+  /**
+   * 创建多选一随机结果
+   */
+  static multipleChoice(outcomes: Array<{
+    outcome: EventOutcome;
+    probability?: number;
+    weight?: number;
+  }>): EventOutcome {
+    return RandomOutcomeFactory.multipleChoice(outcomes);
+  }
+
+  /**
+   * 创建随机物品从列表中选择
+   */
+  static randomItemFromList(itemIds: string[], quantity: number = 1): EventOutcome {
+    return {
+      type: 'randomOutcome',
+      key: 'randomItemFromList',
+      possibleOutcomes: itemIds.map(itemId => ({
+        outcome: {
+          type: 'itemGain',
+          key: itemId,
+          value: quantity
+        },
+        weight: 1
+      }))
     };
   }
 }

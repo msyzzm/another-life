@@ -16,6 +16,7 @@ import { historyEvents } from './historyEvents';
 import { advancedEvents } from './advancedEvents';
 import { specialEvents } from './specialEvents';
 import { mysteriousMerchantChain, dragonLairChain } from './eventChains';
+import { randomEvents } from './randomEvents';
 
 // 合并所有事件
 export const eventLibrary: GameEvent[] = [
@@ -37,6 +38,9 @@ export const eventLibrary: GameEvent[] = [
   // 事件链
   ...mysteriousMerchantChain, // 神秘商人事件链
   ...dragonLairChain,        // 龙穴探险事件链
+  
+  // 随机事件
+  ...randomEvents,           // 随机结果事件
 ];
 
 // 按类型分类导出，方便按需使用

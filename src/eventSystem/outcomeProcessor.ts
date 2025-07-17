@@ -1,6 +1,7 @@
 import type { EventOutcome } from './eventTypes';
 import type { Character } from '../types/character';
 import type { Inventory } from '../types/inventory';
+import { RandomProcessor } from './randomProcessor';
 
 // 结果处理接口
 export interface OutcomeResult {
@@ -331,23 +332,34 @@ export function processOutcome(
   inventory: Inventory,
   outcome: EventOutcome
 ): OutcomeResult {
-  switch (outcome.type) {
+  // 首先解析随机结果，将随机配置转换为固定值
+  const resolvedOutcome = RandomProcessor.resolveRandomOutcome(outcome);
+  
+  switch (resolvedOutcome.type) {
     case 'attributeChange':
-      return processAttributeChange(character, outcome);
+      return processAttributeChange(character, resolvedOutcome);
     case 'levelChange':
-      return processLevelChange(character, outcome);
+      return processLevelChange(character, resolvedOutcome);
     case 'itemGain':
-      return processItemGain(character, inventory, outcome);
+      return processItemGain(character, inventory, resolvedOutcome);
     case 'itemLoss':
-      return processItemLoss(inventory, outcome);
+      return processItemLoss(inventory, resolvedOutcome);
     case 'custom':
-      return processCustomOutcome(character, inventory, outcome);
+      return processCustomOutcome(character, inventory, resolvedOutcome);
+    case 'chainContext':
+      // 链上下文结果需要特殊处理，这里返回成功但不做实际操作
+      // 实际的链上下文处理在 eventChainManager 中进行
+      return {
+        success: true,
+        logs: [`链上下文操作: ${resolvedOutcome.key}`],
+        changes: {}
+      };
     default:
       return {
         success: false,
         logs: [],
         changes: {},
-        error: `Unknown outcome type: ${(outcome as any).type}`
+        error: `Unknown outcome type: ${(resolvedOutcome as any).type}`
       };
   }
 }

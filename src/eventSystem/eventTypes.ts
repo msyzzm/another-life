@@ -84,14 +84,42 @@ export interface ItemChange {
   quantity: number;
 }
 
-// 扩展事件结果类型，支持链上下文操作
+// 随机值配置接口
+export interface RandomValueConfig {
+  type: 'range' | 'choice' | 'weighted';
+  // 范围随机 (type: 'range')
+  min?: number;
+  max?: number;
+  // 选择随机 (type: 'choice')
+  choices?: Array<number | string>;
+  // 权重随机 (type: 'weighted')
+  weightedChoices?: Array<{
+    value: number | string;
+    weight: number;
+  }>;
+  // 通用配置
+  allowFloat?: boolean; // 是否允许浮点数，默认false
+}
+
+// 扩展事件结果类型，支持链上下文操作和随机结果
 export interface EventOutcome {
-  type: 'attributeChange' | 'levelChange' | 'itemGain' | 'itemLoss' | 'custom' | 'chainContext';
+  type: 'attributeChange' | 'levelChange' | 'itemGain' | 'itemLoss' | 'custom' | 'chainContext' | 'randomOutcome';
   key: string;
-  value: number | string;
+  value?: number | string; // 固定值（与random互斥）
+  
+  // 随机结果支持
+  random?: RandomValueConfig; // 随机值配置（与value互斥）
+  
   // 链上下文操作专用参数
   contextOperation?: 'set' | 'add' | 'remove' | 'append'; // 上下文操作类型
   contextPath?: string; // 上下文路径，如 'choices.lastDecision'
+  
+  // 随机结果专用参数 (type: 'randomOutcome')
+  possibleOutcomes?: Array<{
+    outcome: Omit<EventOutcome, 'possibleOutcomes'>; // 递归排除避免无限嵌套
+    probability?: number; // 触发概率，默认1.0
+    weight?: number; // 权重，用于加权随机选择
+  }>;
 }
 
 // 扩展游戏事件接口，添加事件链支持
