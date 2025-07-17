@@ -420,43 +420,14 @@ export const tryTriggerEvent = withErrorHandling(
       
       // 步骤5：处理立即触发的链事件 (delay: 0)
       // 如果是事件链起始事件且有 delay: 0 的后续事件，立即处理
-      if (event.isChainStart && event.nextEvents && historyManager) {
-        const immediateEvents = event.nextEvents.filter(nextEvent => (nextEvent.delay || 0) === 0);
-        
-        for (const immediateEvent of immediateEvents) {
-          const nextEvent = eventLibrary.find(e => e.id === immediateEvent.eventId);
-          if (!nextEvent) {
-            console.warn(`🔗 立即触发的链事件未找到: ${immediateEvent.eventId}`);
-            continue;
-          }
-          
-          console.log(`🔗 立即触发链事件: ${nextEvent.name} (${nextEvent.id})`);
-          
-          try {
-            // 应用可能的上下文更新
-            if (immediateEvent.contextUpdate && currentChainId) {
-              eventChainManager.updateChainContext(currentChainId, immediateEvent.contextUpdate);
-            }
-            
-            // 立即触发后续事件
-            const immediateResult = tryTriggerEvent(
-              nextEvent,
-              result.character,
-              result.inventory,
-              historyManager,
-              currentChainId,
-              currentDay
-            );
-            
-            if (immediateResult.triggered && immediateResult.result) {
-              // 更新结果为最新状态
-              result = immediateResult.result;
-              console.log(`🔗 立即触发成功: ${nextEvent.name}`);
-            }
-          } catch (error: any) {
-            console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
-          }
-        }
+      if (event.isChainStart && currentChainId && currentDay && event.nextEvents && historyManager) {
+        result = processImmediateChainEvents(
+          event, 
+          result, 
+          historyManager, 
+          currentChainId, 
+          currentDay
+        );
       }
       
       // 返回成功触发的结果
@@ -488,6 +459,116 @@ export const tryTriggerEvent = withErrorHandling(
   ErrorType.EVENT_PROCESSING_ERROR,
   ErrorSeverity.HIGH
 );
+
+/**
+ * 处理立即触发的链事件 (delay: 0)
+ * 
+ * 使用迭代方式而非递归，避免栈溢出和提高性能。
+ * 支持多层级的 delay: 0 事件链，同时防止无限循环。
+ * 
+ * @param {GameEvent} startEvent - 起始事件
+ * @param {Object} result - 当前的角色和背包状态
+ * @param {HistoryManager} historyManager - 历史管理器
+ * @param {string} chainId - 事件链ID
+ * @param {number} currentDay - 当前天数
+ * @returns {Object} 更新后的角色和背包状态
+ */
+function processImmediateChainEvents(
+  startEvent: GameEvent,
+  result: { character: Character; inventory: Inventory; logs: string[] },
+  historyManager: HistoryManager,
+  chainId: string,
+  currentDay: number
+): { character: Character; inventory: Inventory; logs: string[] } {
+  const maxDepth = 10; // 防止无限循环的最大深度
+  const processedEvents = new Set<string>(); // 防止重复处理同一事件
+  let currentResult = result;
+  let eventsToProcess = startEvent.nextEvents?.filter(nextEvent => (nextEvent.delay || 0) === 0) || [];
+  let depth = 0;
+
+  while (eventsToProcess.length > 0 && depth < maxDepth) {
+    const currentBatch = [...eventsToProcess];
+    eventsToProcess = [];
+    depth++;
+
+    console.log(`🔗 处理第${depth}层立即触发事件，共${currentBatch.length}个事件`);
+
+    for (const immediateEvent of currentBatch) {
+      // 防止重复处理同一事件
+      if (processedEvents.has(immediateEvent.eventId)) {
+        console.warn(`🔗 跳过重复事件: ${immediateEvent.eventId}`);
+        continue;
+      }
+      processedEvents.add(immediateEvent.eventId);
+
+      const nextEvent = eventLibrary.find(e => e.id === immediateEvent.eventId);
+      if (!nextEvent) {
+        console.warn(`🔗 立即触发的链事件未找到: ${immediateEvent.eventId}`);
+        continue;
+      }
+
+      console.log(`🔗 立即触发链事件: ${nextEvent.name} (${nextEvent.id}) [深度${depth}]`);
+
+      try {
+        // 应用可能的上下文更新
+        if (immediateEvent.contextUpdate && chainId) {
+          eventChainManager.updateChainContext(chainId, immediateEvent.contextUpdate);
+        }
+
+        // 检查事件是否可以触发
+        if (!canTriggerEvent(nextEvent, currentResult.character, currentResult.inventory, historyManager, chainId)) {
+          console.log(`🔗 立即触发事件条件不满足: ${nextEvent.name}`);
+          continue;
+        }
+
+        // 验证事件结果的先决条件
+        const validation = validateEventOutcomes(nextEvent, currentResult.character, currentResult.inventory);
+        if (!validation.valid) {
+          console.warn(`🔗 立即触发事件验证失败: ${nextEvent.name}`);
+          continue;
+        }
+
+        // 推进事件链
+        if (nextEvent.chainId && chainId === nextEvent.chainId) {
+          eventChainManager.advanceChain(
+            nextEvent.chainId,
+            nextEvent,
+            currentResult.character,
+            currentDay
+          );
+        }
+
+        // 应用事件结果
+        const eventResult = applyEventOutcome(nextEvent, currentResult.character, currentResult.inventory, chainId);
+        
+        // 合并日志，避免丢失之前事件的日志
+        currentResult = {
+          character: eventResult.character,
+          inventory: eventResult.inventory,
+          logs: [...currentResult.logs, ...eventResult.logs]  // 累积所有日志
+        };
+
+        console.log(`🔗 立即触发成功: ${nextEvent.name} [深度${depth}]`);
+
+        // 检查这个事件是否也有 delay: 0 的后续事件
+        if (nextEvent.nextEvents) {
+          const nextImmediateEvents = nextEvent.nextEvents.filter(ne => (ne.delay || 0) === 0);
+          eventsToProcess.push(...nextImmediateEvents);
+        }
+
+      } catch (error: any) {
+        console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
+      }
+    }
+  }
+
+  if (depth >= maxDepth) {
+    console.warn(`🔗 立即触发事件链达到最大深度限制 (${maxDepth})，停止处理以防无限循环`);
+  }
+
+  console.log(`🔗 立即触发事件链处理完成，总深度: ${depth}，处理事件数: ${processedEvents.size}`);
+  return currentResult;
+}
 
 // 批量触发事件（考虑权重和互斥性）- 增强错误处理和事件链支持
 export const triggerEventsBatch = withErrorHandling(

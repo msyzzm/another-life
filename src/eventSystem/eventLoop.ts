@@ -139,8 +139,8 @@ function selectEventsWithWeightedRandom(
       }
     }
   }
-  
-  console.log(`🔍 最终选择了 ${selectedEvents.length} 个事件`);
+
+  console.log(`🔍 最终选择了 ${selectedEvents.length} 个事件： ${selectedEvents.map(e => e.name).join(', ')}`);
   return selectedEvents;
 }
 
