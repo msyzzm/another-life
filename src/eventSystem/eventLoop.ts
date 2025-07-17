@@ -366,6 +366,7 @@ export async function runAdvancedEventLoop(
       historyManager,
       finalCharacter.daysLived // 传递当前天数
     );
+    console.log("批量触发的事件结果包括事件：", batchResultsArray);
 
     // 初始化这些变量用于循环处理
     let currentCharacterState = { ...finalCharacter };
@@ -385,6 +386,7 @@ export async function runAdvancedEventLoop(
       }
       return eventResult; // 保留原始的 eventResult 结构
     });
+
 
     finalCharacter = currentCharacterState; // 赋值处理完所有事件后的最终状态
     finalInventory = currentInventoryState; // 赋值处理完所有事件后的最终状态

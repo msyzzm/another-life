@@ -361,6 +361,13 @@ export const tryTriggerEvent = withErrorHandling(
     result?: { character: Character; inventory: Inventory; logs: string[] };
     error?: string;
     chainContext?: any;
+    chainEvents?: Array<{
+      event: GameEvent;
+      triggered: boolean;
+      result?: { character: Character; inventory: Inventory; logs: string[] };
+      error?: string;
+      chainContext?: any;
+    }>;
   } {
     try {
       // 步骤1：检查事件是否可触发（包括所有条件和链上下文条件）
@@ -420,21 +427,28 @@ export const tryTriggerEvent = withErrorHandling(
       
       // 步骤5：处理立即触发的链事件 (delay: 0)
       // 如果是事件链起始事件且有 delay: 0 的后续事件，立即处理
+      let chainEventsResult = null;
       if (event.isChainStart && currentChainId && currentDay && event.nextEvents && historyManager) {
-        result = processImmediateChainEvents(
+        chainEventsResult = processImmediateChainEvents(
           event, 
           result, 
           historyManager, 
           currentChainId, 
           currentDay
         );
+        result = {
+          character: chainEventsResult.character,
+          inventory: chainEventsResult.inventory,
+          logs: chainEventsResult.logs
+        };
       }
       
       // 返回成功触发的结果
       return { 
         triggered: true, 
         result, 
-        chainContext 
+        chainContext,
+        chainEvents: chainEventsResult?.triggeredChainEvents || []
       };
       
     } catch (error: any) {
@@ -471,7 +485,7 @@ export const tryTriggerEvent = withErrorHandling(
  * @param {HistoryManager} historyManager - 历史管理器
  * @param {string} chainId - 事件链ID
  * @param {number} currentDay - 当前天数
- * @returns {Object} 更新后的角色和背包状态
+ * @returns {Object} 更新后的角色和背包状态以及触发的链事件列表
  */
 function processImmediateChainEvents(
   startEvent: GameEvent,
@@ -479,12 +493,30 @@ function processImmediateChainEvents(
   historyManager: HistoryManager,
   chainId: string,
   currentDay: number
-): { character: Character; inventory: Inventory; logs: string[] } {
+): { 
+  character: Character; 
+  inventory: Inventory; 
+  logs: string[];
+  triggeredChainEvents: Array<{
+    event: GameEvent;
+    triggered: boolean;
+    result?: { character: Character; inventory: Inventory; logs: string[] };
+    error?: string;
+    chainContext?: any;
+  }>;
+} {
   const maxDepth = 10; // 防止无限循环的最大深度
   const processedEvents = new Set<string>(); // 防止重复处理同一事件
   let currentResult = result;
   let eventsToProcess = startEvent.nextEvents?.filter(nextEvent => (nextEvent.delay || 0) === 0) || [];
   let depth = 0;
+  const triggeredChainEvents: Array<{
+    event: GameEvent;
+    triggered: boolean;
+    result?: { character: Character; inventory: Inventory; logs: string[] };
+    error?: string;
+    chainContext?: any;
+  }> = [];
 
   while (eventsToProcess.length > 0 && depth < maxDepth) {
     const currentBatch = [...eventsToProcess];
@@ -518,6 +550,12 @@ function processImmediateChainEvents(
         // 检查事件是否可以触发
         if (!canTriggerEvent(nextEvent, currentResult.character, currentResult.inventory, historyManager, chainId)) {
           console.log(`🔗 立即触发事件条件不满足: ${nextEvent.name}`);
+          // 记录未触发的链事件
+          triggeredChainEvents.push({
+            event: nextEvent,
+            triggered: false,
+            error: '事件条件不满足'
+          });
           continue;
         }
 
@@ -525,6 +563,12 @@ function processImmediateChainEvents(
         const validation = validateEventOutcomes(nextEvent, currentResult.character, currentResult.inventory);
         if (!validation.valid) {
           console.warn(`🔗 立即触发事件验证失败: ${nextEvent.name}`);
+          // 记录验证失败的链事件
+          triggeredChainEvents.push({
+            event: nextEvent,
+            triggered: false,
+            error: '事件验证失败'
+          });
           continue;
         }
 
@@ -548,6 +592,17 @@ function processImmediateChainEvents(
           logs: [...currentResult.logs, ...eventResult.logs]  // 累积所有日志
         };
 
+        // 记录成功触发的链事件
+        triggeredChainEvents.push({
+          event: nextEvent,
+          triggered: true,
+          result: {
+            character: eventResult.character,
+            inventory: eventResult.inventory,
+            logs: eventResult.logs
+          }
+        });
+
         console.log(`🔗 立即触发成功: ${nextEvent.name} [深度${depth}]`);
 
         // 检查这个事件是否也有 delay: 0 的后续事件
@@ -558,6 +613,12 @@ function processImmediateChainEvents(
 
       } catch (error: any) {
         console.warn(`🔗 立即触发链事件失败: ${nextEvent.id}, 错误: ${error.message}`);
+        // 记录失败的链事件
+        triggeredChainEvents.push({
+          event: nextEvent,
+          triggered: false,
+          error: error.message
+        });
       }
     }
   }
@@ -567,7 +628,10 @@ function processImmediateChainEvents(
   }
 
   console.log(`🔗 立即触发事件链处理完成，总深度: ${depth}，处理事件数: ${processedEvents.size}`);
-  return currentResult;
+  return {
+    ...currentResult,
+    triggeredChainEvents
+  };
 }
 
 // 批量触发事件（考虑权重和互斥性）- 增强错误处理和事件链支持
@@ -644,6 +708,11 @@ export const triggerEventsBatch = withErrorHandling(
             chainContext: triggerResult.chainContext
           });
           
+          // 添加链事件到结果中
+          if (triggerResult.chainEvents && triggerResult.chainEvents.length > 0) {
+            results.push(...triggerResult.chainEvents);
+          }
+          
           if (triggerResult.triggered && triggerResult.result) {
             currentCharacter = triggerResult.result.character;
             currentInventory = triggerResult.result.inventory;
@@ -719,6 +788,11 @@ export const triggerEventsBatch = withErrorHandling(
             error: triggerResult.error,
             chainContext: triggerResult.chainContext
           });
+          
+          // 添加链事件到结果中
+          if (triggerResult.chainEvents && triggerResult.chainEvents.length > 0) {
+            results.push(...triggerResult.chainEvents);
+          }
           
           if (triggerResult.triggered && triggerResult.result) {
             currentCharacter = triggerResult.result.character;
