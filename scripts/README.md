@@ -301,3 +301,42 @@ DEBUG: true
 ---
 
 通过本工具，您可以快速为游戏事件生成高质量的插图，提升游戏的视觉体验！
+
+## 🧹 水印去除工具
+
+### removeWatermark.cjs
+
+如果生成的图片顶部有水印，可以使用此工具自动去除：
+
+```bash
+# 安装依赖
+npm install
+
+# 去除所有事件图片的水印（默认裁剪顶部50像素）
+node scripts/removeWatermark.cjs
+
+# 处理单个文件
+node scripts/removeWatermark.cjs --file public/assets/events/随机训练.png
+
+# 自定义裁剪高度
+node scripts/removeWatermark.cjs --crop 60
+
+# 保存为新文件而不覆盖原文件
+node scripts/removeWatermark.cjs --suffix "_clean"
+```
+
+**支持的图片格式**: PNG, JPEG, WebP
+
+**详细使用说明**: 请查看 [水印去除使用说明.md](./水印去除使用说明.md)
+
+### 推荐工作流程
+
+1. **生成图片**: 使用 `generateEventImages.cjs` 生成事件图片
+2. **去除水印**: 使用 `removeWatermark.cjs` 去除顶部水印
+3. **验证结果**: 检查处理后的图片质量
+
+```bash
+# 完整流程示例
+IMAGE_API_TOKEN=your_token node scripts/generateEventImages.cjs --event "随机训练" --file "src/eventSystem/events/randomEvents.ts"
+node scripts/removeWatermark.cjs --file public/assets/events/随机训练.png
+```
