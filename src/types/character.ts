@@ -3,6 +3,9 @@ export interface Character {
   name: string;
   level: number;
   daysLived: number; // 角色已经生活的天数
+  profession: string; // 职业
+  race: string; // 种族
+  gender: string; // 性别
   stats: {
     strength: number;
     agility: number;

@@ -23,6 +23,8 @@ const defaultCharacterInstance = () => ({
   name: '旅行者',
   level: 1,
   profession: '无业',
+  race: '人类',
+  gender: '未知',
   daysLived: 0,
   stats: { strength: 5, agility: 5, intelligence: 5, stamina: 5 },
   equipment: {},
@@ -330,7 +332,7 @@ function App() {
       // 准备UI显示的日志数据
       const timestamp = new Date().toLocaleTimeString();
       // 反转日志顺序，让最新的事件显示在顶部
-      const reversedLogEntries = [...newLogEntries].reverse();
+      const reversedLogEntries = [...newLogEntries];
 
       // 格式化日志条目，添加类型标识用于UI样式
       const logEntries = reversedLogEntries.map((entry, index) => {
@@ -358,7 +360,7 @@ function App() {
       });
 
       // 更新游戏日志显示，保持最多50条记录
-      currentSetGameLog(prevLog => [...logEntries, ...prevLog.slice(0, 50 - logEntries.length)]);
+      currentSetGameLog(prevLog => [...prevLog.slice(0, 50 - logEntries.length), ...logEntries]);
 
     } catch (error) {
       // 处理致命错误 - 记录错误但不中断游戏
@@ -452,6 +454,7 @@ function App() {
   const handleReset = async () => {
     try {
     if (window.confirm('确定要重置游戏吗？这将清除所有进度！')) {
+      setShowErrorPanel(false);
       dataModelManager.clearAll();
       const newCharacter = defaultCharacterInstance();
       const newInventory = defaultInventory();
@@ -971,8 +974,10 @@ function App() {
           <div className="character-info-right">
             {/* 称号和基本信息 */}
             <div className="character-title">
-              <h2>称号：初来乍到的穿越者</h2>
-              <p>年龄/种族/职业: {character ? `${character.daysLived}天 / 人类 / ${character.profession}` : '加载中...'}</p>
+              {/* <h2>称号：初来乍到的穿越者</h2> */}
+              <p>种族: {character?.race}</p>
+              <p>性别: {character?.gender}</p>
+              <p>职业: {character?.profession}</p>
             </div>
             
             {/* HP/MP和属性 */}

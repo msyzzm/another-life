@@ -290,6 +290,27 @@ export function processCustomOutcome(
   try {
     // 这里可以根据 outcome.key 执行不同的自定义逻辑
     switch (outcome.key) {
+      case 'setProfession':
+        // 设置角色职业
+        const profession = String(outcome.value);
+        character.profession = profession;
+        logs.push(`设置职业为: ${profession}`);
+        break;
+        
+      case 'setRace':
+        // 设置角色种族
+        const race = String(outcome.value);
+        character.race = race;
+        logs.push(`设置种族为: ${race}`);
+        break;
+        
+      case 'setGender':
+        // 设置角色性别
+        const gender = String(outcome.value);
+        character.gender = gender;
+        logs.push(`设置性别为: ${gender}`);
+        break;
+        
       case 'fullHeal':
         // 完全恢复所有属性
         Object.keys(character.stats).forEach(stat => {

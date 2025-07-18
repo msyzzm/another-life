@@ -18,9 +18,13 @@ import { specialEvents } from './specialEvents';
 import { mysteriousMerchantChain, dragonLairChain } from './eventChains';
 import { randomEvents } from './randomEvents';
 import { castleEvents } from './castleEvents';
+import { initialEvents } from './initialEvents';
 
 // 合并所有事件
 export const eventLibrary: GameEvent[] = [
+  // 初始事件类型（游戏开始时设置角色基本属性）
+  // ...initialEvents,          // 初始事件
+  
   // 基础事件类型
   ...battleEvents,           // 战斗事件
   ...explorationEvents,      // 探索事件
@@ -47,6 +51,7 @@ export const eventLibrary: GameEvent[] = [
 
 // 按类型分类导出，方便按需使用
 export const eventsByType = {
+  initial: initialEvents,     // 初始事件
   battle: battleEvents,
   exploration: explorationEvents,
   levelUp: levelUpEvents,
@@ -66,6 +71,7 @@ export const eventsByType = {
 export const eventStats = {
   total: eventLibrary.length,
   byType: {
+    initial: initialEvents.length,
     battle: battleEvents.length,
     exploration: explorationEvents.length,
     levelUp: levelUpEvents.length,
@@ -82,6 +88,7 @@ export const eventStats = {
 // 工具函数：根据类型获取事件
 export function getEventsByType(type: string): GameEvent[] {
   switch (type) {
+    case 'initial': return initialEvents;
     case 'battle': return battleEvents;
     case 'exploration': return explorationEvents;
     case 'levelUp': return levelUpEvents;

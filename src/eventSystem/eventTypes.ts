@@ -1,7 +1,7 @@
 import type { Character } from '../types/character';
 
 // 事件类型定义
-export type EventType = 'battle' | 'findItem' | 'levelUp' | 'custom';
+export type EventType = 'battle' | 'findItem' | 'levelUp' | 'custom' | 'initial';
 
 // 扩展条件类型，增加历史条件支持
 export interface EventCondition {

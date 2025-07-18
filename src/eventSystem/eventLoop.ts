@@ -12,6 +12,7 @@ import {
   ErrorSeverity,
   createSystemError 
 } from './errorHandler';
+import { initialEvents } from './events/initialEvents';
 
 export interface EventTriggerResult {
   event: GameEvent;
@@ -285,7 +286,10 @@ export async function runAdvancedEventLoop(
     // 步骤2：处理强制事件或从事件库中筛选可触发事件
     let triggerableEvents: GameEvent[];
     
-    if (forceEvents && forceEvents.length > 0) {
+    // 指定触发初始事件
+    if (character.daysLived == 0){
+      triggerableEvents = initialEvents;
+    } else if (forceEvents && forceEvents.length > 0) {
       // 调试模式：使用强制指定的事件
       console.log(`🔧 调试模式：强制使用 ${forceEvents.length} 个指定事件`);
       triggerableEvents = forceEvents;
