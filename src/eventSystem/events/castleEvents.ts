@@ -1,4 +1,6 @@
 import type { GameEvent } from '../eventTypes';
+import OutcomeFactory from '../outcomeFactory';
+import { RandomOutcomeFactory } from '../randomProcessor';
 
 export const castleEvents: GameEvent[] = 
 [
@@ -31,7 +33,13 @@ export const castleEvents: GameEvent[] =
     "name": "接近古堡",
     "description": "你来到了古堡外围，高大的城墙和紧闭的大门给人一种不祥的预感。你需要决定如何进入...",
     "chainId": "mystery_castle",
-    "outcomes": [],
+    "outcomes": [
+       {
+        type: "chainContext",
+        key: "castle_approach",
+        random: RandomOutcomeFactory.choice(["castle_force_gate", "castle_find_secret_path", "castle_sneak_in", "castle_give_up"])
+      }
+    ],
     "nextEvents": [
       {
         "eventId": "castle_force_gate",
@@ -57,12 +65,20 @@ export const castleEvents: GameEvent[] =
     "name": "强行破门",
     "description": "你决定用蛮力打开古堡大门。沉重的铁门发出刺耳的摩擦声，惊动了里面的守卫！",
     "chainId": "mystery_castle",
+    "conditions": [
+      {
+        "type": "chainContext",
+        "key": "castle_approach",
+        "operator": "==",
+        "value": "castle_force_gate"
+      }
+    ],
     "outcomes": [
       {
         "type": "attributeChange",
         "key": "stamina",
         "value": -3
-      }
+      },
     ],
     "nextEvents": [
       {

@@ -165,13 +165,11 @@ export class EventChainManager {
     chainId: string;
     eventId: string;
     context: EventChainContext;
-    contextUpdate?: { [key: string]: any };
   }> {
     const scheduledEvents: Array<{
       chainId: string;
       eventId: string;
       context: EventChainContext;
-      contextUpdate?: { [key: string]: any };
     }> = [];
     
     for (const [chainId, chain] of this.activeChains.entries()) {
@@ -186,7 +184,6 @@ export class EventChainManager {
           chainId,
           eventId: scheduledEvent.eventId,
           context: chain.context,
-          contextUpdate: scheduledEvent.contextUpdate
         });
       }
       
@@ -348,7 +345,6 @@ export class EventChainManager {
       chain.nextScheduledEvents.push({
         eventId: nextEvent.eventId,
         scheduledDay,
-        contextUpdate: nextEvent.contextUpdate
       });
       
       console.log(`🔗 调度链事件: ${nextEvent.eventId} 在第 ${scheduledDay} 天`);

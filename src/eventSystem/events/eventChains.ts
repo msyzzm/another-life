@@ -77,7 +77,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
       {
         eventId: 'mysteriousMerchant_choice', // 下一个事件的ID
         delay: 1,                             // 立即触发（同一天）
-        probability: 1.0                      // 100%触发概率
       }
     ],
     
@@ -136,7 +135,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
       {
         eventId: 'mysteriousMerchant_gratitude',
         delay: 1,
-        probability: 0.8
       }
     ]
   },
@@ -161,7 +159,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
       {
         eventId: 'mysteriousMerchant_bonus',
         delay: 3,
-        probability: 1.0,
       }
     ]
   },
@@ -246,7 +243,6 @@ export const dragonLairChain: GameEvent[] = [
       {
         eventId: 'dragonLair_entrance',
         delay: 1,
-        probability: 1.0
       }
     ],
     

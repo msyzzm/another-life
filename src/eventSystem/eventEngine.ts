@@ -542,11 +542,6 @@ function processImmediateChainEvents(
       console.log(`🔗 立即触发链事件: ${nextEvent.name} (${nextEvent.id}) [深度${depth}]`);
 
       try {
-        // 应用可能的上下文更新
-        if (immediateEvent.contextUpdate && chainId) {
-          eventChainManager.updateChainContext(chainId, immediateEvent.contextUpdate);
-        }
-
         // 检查事件是否可以触发
         if (!canTriggerEvent(nextEvent, currentResult.character, currentResult.inventory, historyManager, chainId)) {
           // console.log(`🔗 立即触发事件条件不满足: ${nextEvent.name}`);
@@ -683,11 +678,6 @@ export const triggerEventsBatch = withErrorHandling(
           continue;
         } else {
           console.log(`🔗 找到调度的链事件: ${chainEvent.name} (${chainEvent.id})`);
-        }
-        
-        // 应用上下文更新
-        if (scheduledEvent.contextUpdate) {
-          eventChainManager.updateChainContext(scheduledEvent.chainId, scheduledEvent.contextUpdate);
         }
         
         try {

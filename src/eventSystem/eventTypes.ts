@@ -31,9 +31,7 @@ export interface EventChainContext {
 // 事件链下一步配置
 export interface ChainNextEvent {
   eventId: string;
-  probability?: number; // 触发概率，默认1.0
   delay?: number; // 延迟天数，0表示立即触发
-  contextUpdate?: { [key: string]: any }; // 传递给下一个事件的上下文更新
 }
 
 // 玩家历史记录接口
@@ -141,7 +139,6 @@ export interface GameEvent {
   isChainStart?: boolean; // 是否为链的起始事件
   isChainEnd?: boolean; // 是否为链的结束事件
   nextEvents?: ChainNextEvent[]; // 下一步可能的事件列表
-  chainContextKey?: string; // 链上下文存储的key
   
   // 链事件特殊配置
   skipNormalEvents?: boolean; // 当这个链事件触发时，是否跳过其他正常事件
@@ -155,7 +152,6 @@ export interface ActiveEventChain {
   nextScheduledEvents: Array<{
     eventId: string;
     scheduledDay: number;
-    contextUpdate?: { [key: string]: any };
   }>;
   startDay: number;
   isComplete: boolean;
