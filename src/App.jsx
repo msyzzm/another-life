@@ -57,6 +57,9 @@ function App() {
     latestState.current = { character, inventory, gameLog };
   }, [character, inventory, gameLog]);
   
+  // 创建日志容器的ref，用于自动滚动
+  const logContainerRef = useRef(null);
+  
   // 错误处理相关状态
   const [currentError, setCurrentError] = useState(null);
   const [errorHistory, setErrorHistory] = useState([]);
@@ -91,9 +94,21 @@ function App() {
       timestamp: new Date().toLocaleTimeString()
     };
     
-    // 直接添加到游戏日志，简化逻辑
-    setGameLog(prevLog => [logEntry, ...prevLog.slice(0, 49)]);
+    // 添加到游戏日志末尾，保持最多50条记录
+    setGameLog(prevLog => [...prevLog.slice(-49), logEntry]);
   }, []);
+
+  // 自动滚动到底部的函数
+  const scrollToBottom = useCallback(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, []);
+
+  // 当游戏日志更新时自动滚动到底部
+  useEffect(() => {
+    scrollToBottom();
+  }, [gameLog, scrollToBottom]);
 
   // Ref to track if initialization has run
   const hasInitialized = useRef(false);
@@ -331,11 +346,11 @@ function App() {
 
       // 准备UI显示的日志数据
       const timestamp = new Date().toLocaleTimeString();
-      // 反转日志顺序，让最新的事件显示在顶部
-      const reversedLogEntries = [...newLogEntries];
+      // 保持日志顺序，从上到下显示
+      const orderedLogEntries = [...newLogEntries];
 
       // 格式化日志条目，添加类型标识用于UI样式
-      const logEntries = reversedLogEntries.map((entry, index) => {
+      const logEntries = orderedLogEntries.map((entry, index) => {
         // 处理新的对象格式和旧的字符串格式
         if (typeof entry === 'object' && entry !== null) {
           return {
@@ -360,7 +375,7 @@ function App() {
       });
 
       // 更新游戏日志显示，保持最多50条记录
-      currentSetGameLog(prevLog => [...prevLog.slice(0, 50 - logEntries.length), ...logEntries]);
+      currentSetGameLog(prevLog => [...prevLog.slice(-(50 - logEntries.length)), ...logEntries]);
 
     } catch (error) {
       // 处理致命错误 - 记录错误但不中断游戏
@@ -937,7 +952,7 @@ function App() {
       });
 
       // 更新游戏日志
-      setGameLog(prevLog => [...logEntries, ...prevLog.slice(0, 50 - logEntries.length)]);
+      setGameLog(prevLog => [...prevLog.slice(-(50 - logEntries.length)), ...logEntries]);
 
     } catch (error) {
       handleError(error, '事件循环执行');
@@ -1013,7 +1028,7 @@ function App() {
         
         {/* 事件日志区域 */}
         <div className="event-log-section">
-          <div className="event-log-container">
+          <div className="event-log-container" ref={logContainerRef}>
             {gameLog.length === 0 ? (
               <div className="log-entry system">
                 <span className="log-time">[00:00]</span>
