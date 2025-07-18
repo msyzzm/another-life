@@ -11,6 +11,7 @@ export interface Character {
     agility: number;
     intelligence: number;
     stamina: number;
+    gold: number;
   };
   equipment: {
     weapon?: {

@@ -227,10 +227,14 @@ export function migrateCharacterData(oldData: any): Character {
       agility: oldData.stats?.agility || 5,
       intelligence: oldData.stats?.intelligence || 5,
       stamina: oldData.stats?.stamina || 5,
+      gold: oldData.stats?.gold || 0
     },
     equipment: oldData.equipment || {},
     inventory: oldData.inventory || [],
     relations: oldData.relations || {},
+    profession: '',
+    race: '',
+    gender: ''
   };
   
   return migrated;

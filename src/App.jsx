@@ -477,7 +477,7 @@ function App() {
       setCharacter(newCharacter);
       setInventory(newInventory);
       setGameLog([]);
-      addLogEntry('游戏已重置，开始新的冒险！', 'system');
+      addLogEntry('欢迎来到另一种人生！开始你的冒险吧。', 'system');
     }
     } catch (error) {
       handleError(error, '游戏重置失败');
@@ -997,7 +997,7 @@ function App() {
             
             {/* HP/MP和属性 */}
             <div className="character-stats">
-              <div className="hp-mp-section">
+              {/* <div className="hp-mp-section">
                 <div className="stat-bar">
                   <span>HP</span>
                   <span>100/100</span>
@@ -1006,11 +1006,14 @@ function App() {
                   <span>MP</span>
                   <span>30/30</span>
                 </div>
-              </div>
+              </div> */}
               
               <div className="attributes-section">
                 {character && (
                   <>
+                    <div className="attribute-item">
+                      <span>💰金币 {character.stats.gold ?? 0}</span>
+                    </div>
                     <div className="attribute-item">
                       <span>💪力量 {character.stats.strength}</span>
                       <span>🧠智力 {character.stats.intelligence}</span>
