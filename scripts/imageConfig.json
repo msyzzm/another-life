@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "name": "随机训练",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    },
+    {
+      "name": "神秘宝箱",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    },
+    {
+      "name": "技能练习",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    },
+    {
+      "name": "赌博游戏",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    },
+    {
+      "name": "随机遭遇",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    },
+    {
+      "name": "天气影响",
+      "file": "src/eventSystem/events/randomEvents.ts"
+    }
+  ]
+}

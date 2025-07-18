@@ -11,6 +11,8 @@ export const advancedEvents: GameEvent[] = [
     type: 'custom',
     name: '剑圣的传承',
     description: '传说中的剑圣现身，传授给你无上的剑术。',
+    imageUrl: '/assets/events/剑圣的传承3.png',
+    imageAlt: '剑圣的传承',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 7 },
       { type: 'attribute', key: 'strength', operator: '>=', value: 20 },
@@ -29,6 +31,8 @@ export const advancedEvents: GameEvent[] = [
     type: 'custom',
     name: '大法师的秘密',
     description: '你无意中发现了大法师隐藏的魔法实验室，学到了禁忌的魔法知识。',
+    imageUrl: '/assets/events/大法师的秘密3.png',
+    imageAlt: '大法师的秘密',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 6 },
       { type: 'attribute', key: 'intelligence', operator: '>=', value: 22 },
