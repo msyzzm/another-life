@@ -32,7 +32,6 @@ export interface EventChainContext {
 export interface ChainNextEvent {
   eventId: string;
   probability?: number; // 触发概率，默认1.0
-  conditions?: EventCondition[]; // 额外的触发条件
   delay?: number; // 延迟天数，0表示立即触发
   contextUpdate?: { [key: string]: any }; // 传递给下一个事件的上下文更新
 }
@@ -66,7 +65,6 @@ export interface EventRecord {
   outcomes: string[]; // 结果描述
   timestamp: Date;
   chainId?: string; // 所属的事件链ID
-  chainStep?: number; // 在链中的步骤
 }
 
 // 属性变化记录
@@ -140,7 +138,6 @@ export interface GameEvent {
   
   // 事件链相关字段
   chainId?: string; // 事件链标识符
-  chainStep?: number; // 在链中的步骤（0开始）
   isChainStart?: boolean; // 是否为链的起始事件
   isChainEnd?: boolean; // 是否为链的结束事件
   nextEvents?: ChainNextEvent[]; // 下一步可能的事件列表

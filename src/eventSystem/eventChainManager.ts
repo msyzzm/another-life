@@ -7,8 +7,6 @@ import type {
   EventOutcome
 } from './eventTypes';
 import type { Character } from '../types/character';
-import type { Inventory } from '../types/inventory';
-import { withErrorHandling, ErrorType, ErrorSeverity } from './errorHandler';
 
 /**
  * 事件链管理器
@@ -63,7 +61,7 @@ export class EventChainManager {
     // 创建事件链上下文 - 这是事件链的"记忆"
     const chainContext: EventChainContext = {
       chainId,                                          // 链的唯一标识
-      step: startEvent.chainStep || 0,                  // 当前步骤（从0开始）
+      step: 0,
       data: { ...initialContext },                      // 上下文数据（可在事件间传递）
       character: this.createCharacterSnapshot(character), // 角色状态快照
       timestamp: new Date(),                            // 创建时间戳
@@ -140,7 +138,7 @@ export class EventChainManager {
     }
     
     // 更新链状态
-    chain.currentStep = currentEvent.chainStep || chain.currentStep + 1;
+    chain.currentStep = chain.currentStep + 1;
     chain.context.step = chain.currentStep;
     chain.context.previousEventId = currentEvent.id;
     chain.context.character = this.createCharacterSnapshot(character);

@@ -257,7 +257,7 @@ function App() {
           newLogEntries.push(`❌ 调试模式：未找到名称为 "${forceEventName}" 的事件`);
           // 如果找不到指定事件，执行正常的事件循环
           loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
-            maxEvents: 3,
+            maxEvents: 1,
             useWeights: true,
             guaranteeEvent: true,
             historyManager: currentHistoryManager
@@ -271,7 +271,7 @@ function App() {
         // - guaranteeEvent: true (保证至少触发一个事件)
         // - historyManager: 历史记录管理器，用于历史感知事件
         loopResult = await runAdvancedEventLoop(currentChar, currentInventory, {
-          maxEvents: 3,
+          maxEvents: 1,
           useWeights: true,
           guaranteeEvent: true,
           historyManager: currentHistoryManager
@@ -795,123 +795,10 @@ function App() {
     return () => clearInterval(validationInterval);
   }, [isAutoRunning, autoRunState, validateAutoRunState]);
 
-  // 预先计算所有的memoized值（必须在早期返回之前）
-  const characterPanel = useMemo(() => {
-    if (!character) return null;
-    return (
-      <section className="character-panel">
-        <h2>角色状态</h2>
-        <div className="character-info">
-          <p><strong>已生存天数:</strong> {character.daysLived}</p>
-          <p><strong>等级:</strong> {character.level}</p>
-          
-          <div className="stats">
-            <h3>属性</h3>
-            <div className="stat-item">
-              <span>力量:</span> 
-              <span className="stat-value">{character.stats.strength}</span>
-            </div>
-            <div className="stat-item">
-              <span>敏捷:</span> 
-              <span className="stat-value">{character.stats.agility}</span>
-            </div>
-            <div className="stat-item">
-              <span>智力:</span> 
-              <span className="stat-value">{character.stats.intelligence}</span>
-            </div>
-            <div className="stat-item">
-              <span>体力:</span> 
-              <span className="stat-value">{character.stats.stamina}</span>
-            </div>
-          </div>
-
-          {/* 装备显示 */}
-          {character.equipment && Object.keys(character.equipment).length > 0 && (
-            <div className="equipment">
-              <h3>装备</h3>
-              {Object.entries(character.equipment).map(([slot, item]) => (
-                <div key={slot} className="equipment-item">
-                  <span className="slot-name">{slot}:</span>
-                  <span className="item-name">{item.name}</span>
-                  {item.effects && (
-                    <span className="item-effects">
-                      {Object.entries(item.effects).map(([stat, value]) => 
-                        ` +${value} ${stat}`
-                      ).join(', ')}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }, [character]);
-
-  const inventoryPanel = useMemo(() => {
-    if (!inventory) return null;
-    return (
-      <section className="inventory-panel">
-        <h2>背包 ({inventory.items.length}/{inventory.capacity})</h2>
-        <div className="inventory-items">
-          {inventory.items.length === 0 ? (
-            <p>背包是空的</p>
-          ) : (
-            inventory.items.map(item => (
-              <div key={`${item.id}-${item.quantity}`} className="inventory-item">
-                <span className="item-name">{item.name}</span>
-                <span className="item-type">({item.type})</span>
-                <span className="item-quantity">x{item.quantity}</span>
-                {item.description && (
-                  <div className="item-description">{item.description}</div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-    );
-  }, [inventory]);
-
-  const gameLogPanel = useMemo(() => (
-    <section className="game-log-panel">
-      <h2>游戏日志</h2>
-      <div className="game-log">
-        {gameLog.length === 0 ? (
-          <p>暂无日志记录</p>
-        ) : (
-          gameLog.map((entry, index) => (
-            <div key={`${entry.id}-${index}`} className={`log-entry ${entry.type}`}>
-              <div className="log-header">
-                <span className="log-time">[{entry.timestamp}]</span>
-                <span className="log-message">{entry.message}</span>
-              </div>
-              {entry.imageUrl && entry.type === 'event' && (
-                <div className="log-image-container">
-                  <img 
-                    src={entry.imageUrl} 
-                    alt={entry.imageAlt || entry.eventName || '事件图片'}
-                    className="log-event-image"
-                    onError={(e) => {
-                      // 图片加载失败时隐藏图片容器
-                      e.target.style.display = 'none';
-                      console.warn(`事件图片加载失败: ${entry.imageUrl}`);
-                    }}
-                    onLoad={(e) => {
-                      // 图片加载成功时确保显示
-                      e.target.style.display = 'block';
-                    }}
-                  />
-                  <span className="image-caption">{entry.eventName}</span>
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </section>
-  ), [gameLog]);
+  // 新增状态：控制浮层显示（移到组件顶部）
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [currentEventData, setCurrentEventData] = useState(null);
 
   // 渲染加载状态
   if (isLoading && !character) {
@@ -925,6 +812,138 @@ function App() {
     );
   }
 
+  // 处理下一天按钮点击
+  const handleNextDayClick = async () => {
+    // 直接执行事件循环并显示结果
+    if (!historyManager || !character || !inventory) {
+      handleError(new Error('游戏数据未初始化'), '触发下一天事件');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // 调用事件循环，只触发一个事件
+      const forceEventName = isDebugMode && debugEventName ? debugEventName : null;
+      let loopResult;
+      
+      if (forceEventName && forceEventName.trim()) {
+        // 调试模式：强制触发指定事件
+        const targetEvent = eventLibrary.find(event => 
+          event.name === forceEventName.trim() || event.id === forceEventName.trim()
+        );
+        
+        if (targetEvent) {
+          loopResult = await runAdvancedEventLoop(character, inventory, {
+            maxEvents: 1,
+            useWeights: false,
+            guaranteeEvent: true,
+            historyManager: historyManager,
+            forceEvents: [targetEvent]
+          });
+        } else {
+          // 如果找不到指定事件，执行正常的事件循环
+          loopResult = await runAdvancedEventLoop(character, inventory, {
+            maxEvents: 1,
+            useWeights: true,
+            guaranteeEvent: true,
+            historyManager: historyManager
+          });
+        }
+      } else {
+        // 正常模式：只触发一个事件
+        loopResult = await runAdvancedEventLoop(character, inventory, {
+          maxEvents: 1,
+          useWeights: true,
+          guaranteeEvent: true,
+          historyManager: historyManager
+        });
+      }
+
+      // 更新游戏状态
+      setCharacter(loopResult.character);
+      setInventory(loopResult.inventory);
+
+      // 获取触发的事件并显示在弹窗中
+      const triggeredEvent = loopResult.results.find(result => result.triggered);
+      if (triggeredEvent) {
+        const eventData = {
+          title: triggeredEvent.event.name,
+          description: triggeredEvent.event.description,
+          imageUrl: triggeredEvent.event.imageUrl,
+          imageAlt: triggeredEvent.event.imageAlt || triggeredEvent.event.name,
+          logs: triggeredEvent.logs || []
+        };
+        
+        setCurrentEventData(eventData);
+        setShowEventModal(true);
+      }
+
+      // 添加日志记录
+      const timestamp = new Date().toLocaleTimeString();
+      const newLogEntries = [];
+      
+      newLogEntries.push(`第 ${loopResult.character.daysLived} 天`);
+      
+      if (triggeredEvent) {
+        newLogEntries.push({
+          type: 'event',
+          message: triggeredEvent.event.description,
+          imageUrl: triggeredEvent.event.imageUrl,
+          imageAlt: triggeredEvent.event.imageAlt || triggeredEvent.event.name,
+          eventName: triggeredEvent.event.name
+        });
+
+        // 添加事件产生的详细日志
+        if (triggeredEvent.logs && triggeredEvent.logs.length > 0) {
+          triggeredEvent.logs.forEach(log => {
+            newLogEntries.push({
+              type: 'detail',
+              message: `  · ${log}`
+            });
+          });
+        }
+      }
+
+      // 检查升级
+      if (loopResult.summary.newLevel) {
+        newLogEntries.push(`🎉 恭喜! 你升级到了等级 ${loopResult.summary.newLevel}!`);
+      }
+
+      // 格式化日志条目
+      const logEntries = newLogEntries.map((entry, index) => {
+        if (typeof entry === 'object' && entry !== null) {
+          return {
+            id: `${Date.now()}-${index}`,
+            message: entry.message,
+            type: entry.type || 'event',
+            timestamp,
+            imageUrl: entry.imageUrl,
+            imageAlt: entry.imageAlt,
+            eventName: entry.eventName
+          };
+        } else {
+          return {
+            id: `${Date.now()}-${index}`,
+            message: entry,
+            type: entry.includes('🎉') ? 'system' :
+                  entry.includes('天') ? 'system' : 'event',
+            timestamp
+          };
+        }
+      });
+
+      // 更新游戏日志
+      setGameLog(prevLog => [...logEntries, ...prevLog.slice(0, 50 - logEntries.length)]);
+
+    } catch (error) {
+      handleError(error, '事件循环执行');
+      addLogEntry('今天发生了一些技术问题，但明天会更好！', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 渲染主应用
   return (
     <div className="App">
@@ -936,34 +955,176 @@ function App() {
           </button>
         </div>
       )}
-      <header className="App-header">
-        <h1>另一种人生</h1>
-        
-        {/* 系统状态指示器 */}
-        <div className="system-status">
-          <div className={`auto-save-indicator ${autoSaveStatus}`}>
-            {autoSaveStatus === 'saving' && '⌛ 保存中...'}
-            {autoSaveStatus === 'success' && '✅ 已保存'}
-            {autoSaveStatus === 'error' && '❌ 保存失败'}
+      
+      {/* 主游戏界面 */}
+      <div className="game-main-layout">
+        {/* 顶部角色信息区域 */}
+        <div className="character-header">
+          {/* 左侧头像 */}
+          <div className="character-avatar">
+            <div className="avatar-circle">
+              👤
+            </div>
           </div>
           
-          {systemHealth && (
-            <div className={`health-indicator ${systemHealth.status}`}>
-              {systemHealth.status === 'healthy' && '💚 系统正常'}
-              {systemHealth.status === 'warning' && '⚠️ 系统警告'}
-              {systemHealth.status === 'critical' && '🔴 系统错误'}
+          {/* 右侧角色信息 */}
+          <div className="character-info-right">
+            {/* 称号和基本信息 */}
+            <div className="character-title">
+              <h2>称号：初来乍到的穿越者</h2>
+              <p>年龄/种族/职业: {character ? `${character.daysLived}天 / 人类 / ${character.profession}` : '加载中...'}</p>
             </div>
-          )}
+            
+            {/* HP/MP和属性 */}
+            <div className="character-stats">
+              <div className="hp-mp-section">
+                <div className="stat-bar">
+                  <span>HP</span>
+                  <span>100/100</span>
+                </div>
+                <div className="stat-bar">
+                  <span>MP</span>
+                  <span>30/30</span>
+                </div>
+              </div>
+              
+              <div className="attributes-section">
+                {character && (
+                  <>
+                    <div className="attribute-item">
+                      <span>💪力量 {character.stats.strength}</span>
+                      <span>🧠智力 {character.stats.intelligence}</span>
+                    </div>
+                    <div className="attribute-item">
+                      <span>⚡敏捷 {character.stats.agility}</span>
+                      <span>🛡️体力 {character.stats.stamina}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 事件日志区域 */}
+        <div className="event-log-section">
+          <div className="event-log-container">
+            {gameLog.length === 0 ? (
+              <div className="log-entry system">
+                <span className="log-time">[00:00]</span>
+                <span className="log-message">你在一阵光芒中醒来...</span>
+              </div>
+            ) : (
+              gameLog.map((entry, index) => (
+                <div key={`${entry.id}-${index}`} className={`log-entry ${entry.type}`}>
+                  <span className="log-time">[{entry.timestamp}]</span>
+                  <span className="log-message">{entry.message}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        {/* 底部按钮区域 */}
+        <div className="bottom-controls">
+          <button 
+            className="main-action-btn next-day-btn"
+            onClick={handleNextDayClick}
+            disabled={isLoading || autoRunState === 'running' || isProcessingQueue}
+          >
+            🗺️前进
+          </button>
           
           <button 
-            className="error-panel-toggle"
-            onClick={() => setShowErrorPanel(!showErrorPanel)}
-            title="查看错误状态"
+            className="main-action-btn inventory-btn"
+            onClick={() => setShowInventoryModal(true)}
           >
-            🛠️ {errorHistory.length > 0 && `(${errorHistory.length})`}
+            🏕️背包
           </button>
         </div>
-      </header>
+      </div>
+
+      {/* 事件详情浮层 */}
+      {showEventModal && currentEventData && (
+        <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
+          <div className="event-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowEventModal(false)}>
+              ✖
+            </button>
+            
+            <div className="event-image-container">
+              <img 
+                src={currentEventData.imageUrl} 
+                alt={currentEventData.imageAlt}
+                className="event-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+            
+            <h3 className="event-title">{currentEventData.title}</h3>
+            <hr className="event-divider" />
+            <p className="event-description">{currentEventData.description}</p>
+            
+            {/* 显示事件产生的效果 */}
+            {currentEventData.logs && currentEventData.logs.length > 0 && (
+              <div className="event-effects">
+                <h4>事件效果：</h4>
+                <ul>
+                  {currentEventData.logs.map((log, index) => (
+                    <li key={index} className="effect-item">{log}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 背包浮层 */}
+      {showInventoryModal && (
+        <div className="modal-overlay" onClick={() => setShowInventoryModal(false)}>
+          <div className="inventory-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowInventoryModal(false)}>
+              ✖
+            </button>
+            
+            <h3>背包</h3>
+            <div className="inventory-grid">
+              {inventory && inventory.items.length === 0 ? (
+                <p>背包是空的</p>
+              ) : (
+                inventory && inventory.items.map(item => (
+                  <div key={`${item.id}-${item.quantity}`} className="inventory-slot">
+                    <div className="item-info">
+                      <span className="item-name">{item.name}</span>
+                      <span className="item-quantity">x{item.quantity}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 系统状态指示器（移到右上角） */}
+      <div className="system-status-corner">
+        <div className={`auto-save-indicator ${autoSaveStatus}`}>
+          {autoSaveStatus === 'saving' && '⌛'}
+          {autoSaveStatus === 'success' && '✅'}
+          {autoSaveStatus === 'error' && '❌'}
+        </div>
+        
+        <button 
+          className="error-panel-toggle"
+          onClick={() => setShowErrorPanel(!showErrorPanel)}
+          title="查看错误状态"
+        >
+          🛠️ {errorHistory.length > 0 && `(${errorHistory.length})`}
+        </button>
+      </div>
 
       {/* 错误通知 */}
       {currentError && (
@@ -1035,131 +1196,111 @@ function App() {
         </div>
       )}
 
-      <main className="game-content">
-        {/* 角色信息面板 */}
-        {characterPanel}
-
-        {/* 背包面板 */}
-        {inventoryPanel}
-
-        {/* 游戏控制面板 */}
-        <section className="game-controls">
-          <h2>游戏控制</h2>
-          <div className="control-buttons">
-            <button 
-              className="next-day-btn" 
-              onClick={() => addEventToQueue('NEXT_DAY', { source: 'manual' })}
-              disabled={isLoading || autoRunState === 'running' || isProcessingQueue}
-            >
-              {isLoading ? '处理中...' : (isProcessingQueue ? '队列处理中...' : '下一天')}
-            </button>
-            
-            <button 
-              className={`auto-run-btn ${autoRunState === 'running' ? 'active' : ''}`}
-              onClick={toggleAutoRun}
-              disabled={isLoading || autoRunState === 'starting' || autoRunState === 'stopping'}
-            >
-              {autoRunState === 'starting' && '正在启动...'}
-              {autoRunState === 'running' && '停止自动运行'}
-              {autoRunState === 'stopping' && '正在停止...'}
-              {autoRunState === 'stopped' && '开始自动运行'}
-            </button>
-            
-            <button 
-              className="save-btn" 
-              onClick={handleManualSave}
-              disabled={isLoading}
-            >
-              手动保存
-            </button>
-            
-            <button 
-              className="reset-btn" 
-              onClick={handleReset}
-              disabled={isLoading}
-            >
-              重置游戏
-        </button>
+      {/* 高级控制面板（隐藏，可通过快捷键或特殊方式访问） */}
+      {showErrorPanel && (
+        <div className="advanced-controls-panel">
+          <div className="panel-header">
+            <h3>高级控制</h3>
+            <button onClick={() => setShowErrorPanel(false)}>✕</button>
           </div>
           
-          {autoRunState !== 'stopped' && (
-            <div className="auto-run-status">
-              {autoRunState === 'starting' && '🔄 正在启动自动运行...'}
-              {autoRunState === 'running' && `🔄 自动运行中... (每 ${autoRunSpeed / 1000} 秒) | 执行次数: ${autoRunCount}`}
-              {autoRunState === 'stopping' && '🔄 正在停止自动运行...'}
-              {autoRunState === 'running' && isExecutingEvent && ' | 🔄 执行中...'}
-              {autoRunState === 'running' && isProcessingQueue && ' | 📋 队列处理中...'}
-              {autoRunState === 'running' && eventQueue.length > 0 && ` | 队列: ${eventQueue.length}`}
-            </div>
-          )}
-          
-          {/* 自动运行速度选择器 */}
-          <div className="auto-run-controls">
-            <label htmlFor="speed-selector">自动运行速度:</label>
-            <select 
-              id="speed-selector"
-              value={autoRunSpeed} 
-              onChange={(e) => setAutoRunSpeed(parseInt(e.target.value))}
-              disabled={isAutoRunning}
-            >
-              <option value="1000">极快 (1秒)</option>
-              <option value="2000">快速 (2秒)</option>
-              <option value="3000">正常 (3秒)</option>
-              <option value="5000">慢速 (5秒)</option>
-              <option value="10000">极慢 (10秒)</option>
-            </select>
-          </div>
-          
-          {lastSaved && (
-            <p className="last-saved">上次保存: {lastSaved}</p>
-          )}
-        </section>
-          
-        {/* 游戏日志面板 */}
-        {gameLogPanel}
-
-        {/* 调试面板 */}
-        <section className="debug-panel">
-          <h2>调试面板</h2>
-          
-          <div className="debug-controls">
-            <div className="debug-mode-toggle">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={isDebugMode}
-                  onChange={(e) => setIsDebugMode(e.target.checked)}
-                />
-                启用调试模式
-              </label>
+          <div className="control-section">
+            <h4>游戏控制</h4>
+            <div className="control-buttons">
+              <button 
+                className={`auto-run-btn ${autoRunState === 'running' ? 'active' : ''}`}
+                onClick={toggleAutoRun}
+                disabled={isLoading || autoRunState === 'starting' || autoRunState === 'stopping'}
+              >
+                {autoRunState === 'starting' && '正在启动...'}
+                {autoRunState === 'running' && '停止自动运行'}
+                {autoRunState === 'stopping' && '正在停止...'}
+                {autoRunState === 'stopped' && '开始自动运行'}
+              </button>
+              
+              <button 
+                className="save-btn" 
+                onClick={handleManualSave}
+                disabled={isLoading}
+              >
+                手动保存
+              </button>
+              
+              <button 
+                className="reset-btn" 
+                onClick={handleReset}
+                disabled={isLoading}
+              >
+                重置游戏
+              </button>
             </div>
             
-            {isDebugMode && (
-              <div className="debug-event-input">
-                <label htmlFor="debug-event-name">强制触发事件:</label>
-                <input
-                  id="debug-event-name"
-                  type="text"
-                  value={debugEventName}
-                  onChange={(e) => setDebugEventName(e.target.value)}
-                  placeholder="输入事件名称或ID"
-                  disabled={isLoading || autoRunState === 'running'}
-                />
-                <small>
-                  提示：输入事件的名称或ID，点击"下一天"时将强制触发该事件
-                </small>
+            {autoRunState !== 'stopped' && (
+              <div className="auto-run-status">
+                {autoRunState === 'starting' && '🔄 正在启动自动运行...'}
+                {autoRunState === 'running' && `🔄 自动运行中... (每 ${autoRunSpeed / 1000} 秒) | 执行次数: ${autoRunCount}`}
+                {autoRunState === 'stopping' && '🔄 正在停止自动运行...'}
+                {autoRunState === 'running' && isExecutingEvent && ' | 🔄 执行中...'}
+                {autoRunState === 'running' && isProcessingQueue && ' | 📋 队列处理中...'}
+                {autoRunState === 'running' && eventQueue.length > 0 && ` | 队列: ${eventQueue.length}`}
               </div>
             )}
-          </div>
-          
-          {systemHealth && (
-            <div className="debug-system-info">
-              <h3>系统信息</h3>
-              <p>系统状态: {systemHealth.status}</p>
+            
+            <div className="auto-run-controls">
+              <label htmlFor="speed-selector">自动运行速度:</label>
+              <select 
+                id="speed-selector"
+                value={autoRunSpeed} 
+                onChange={(e) => setAutoRunSpeed(parseInt(e.target.value))}
+                disabled={isAutoRunning}
+              >
+                <option value="1000">极快 (1秒)</option>
+                <option value="2000">快速 (2秒)</option>
+                <option value="3000">正常 (3秒)</option>
+                <option value="5000">慢速 (5秒)</option>
+                <option value="10000">极慢 (10秒)</option>
+              </select>
             </div>
-          )}
-        </section>
-      </main>
+            
+            {lastSaved && (
+              <p className="last-saved">上次保存: {lastSaved}</p>
+            )}
+          </div>
+
+          <div className="debug-section">
+            <h4>调试面板</h4>
+            <div className="debug-controls">
+              <div className="debug-mode-toggle">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={isDebugMode}
+                    onChange={(e) => setIsDebugMode(e.target.checked)}
+                  />
+                  启用调试模式
+                </label>
+              </div>
+              
+              {isDebugMode && (
+                <div className="debug-event-input">
+                  <label htmlFor="debug-event-name">强制触发事件:</label>
+                  <input
+                    id="debug-event-name"
+                    type="text"
+                    value={debugEventName}
+                    onChange={(e) => setDebugEventName(e.target.value)}
+                    placeholder="输入事件名称或ID"
+                    disabled={isLoading || autoRunState === 'running'}
+                  />
+                  <small>
+                    提示：输入事件的名称或ID，点击"下一天"时将强制触发该事件
+                  </small>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </div>
   );
 }

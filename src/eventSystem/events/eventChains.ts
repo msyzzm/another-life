@@ -12,7 +12,6 @@
  * 
  * 📋 **事件链字段说明**：
  * - chainId: 事件链的唯一标识符，同一链中的所有事件必须相同
- * - chainStep: 事件在链中的步骤编号，从0开始递增
  * - isChainStart: 标记链的起始事件，只有起始事件可以被主事件循环触发
  * - isChainEnd: 标记链的结束事件，触发后链将被标记为完成
  * - nextEvents: 定义后续事件的调度信息
@@ -71,14 +70,13 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // === 事件链配置 ===
     chainId: 'mysteriousMerchant',    // 链的唯一标识符
-    chainStep: 0,                     // 这是链的第一步
     isChainStart: true,               // 标记为链的起始事件
     
     // 后续事件调度：立即触发选择事件
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_choice', // 下一个事件的ID
-        delay: 0,                             // 立即触发（同一天）
+        delay: 1,                             // 立即触发（同一天）
         probability: 1.0                      // 100%触发概率
       }
     ],
@@ -102,19 +100,18 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 1,
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_buy',
-        delay: 0,
+        delay: 1,
       },
       {
         eventId: 'mysteriousMerchant_wisdom',
-        delay: 0,
+        delay: 1,
       },
       {
         eventId: 'mysteriousMerchant_leave',
-        delay: 0,
+        delay: 1,
       }
     ]
   },
@@ -135,7 +132,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 2,
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_gratitude',
@@ -161,7 +157,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 2,
     nextEvents: [
       {
         eventId: 'mysteriousMerchant_bonus',
@@ -187,7 +182,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 2,
     isChainEnd: true
   },
   
@@ -206,7 +200,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 3,
     isChainEnd: true
   },
   
@@ -226,7 +219,6 @@ export const mysteriousMerchantChain: GameEvent[] = [
     
     // 事件链字段
     chainId: 'mysteriousMerchant',
-    chainStep: 3,
     isChainEnd: true
   }
 ];
@@ -249,7 +241,6 @@ export const dragonLairChain: GameEvent[] = [
     ],
     
     chainId: 'dragonLair',
-    chainStep: 0,
     isChainStart: true,
     nextEvents: [
       {
@@ -276,11 +267,10 @@ export const dragonLairChain: GameEvent[] = [
     ],
     
     chainId: 'dragonLair',
-    chainStep: 1,
     nextEvents: [
       {
         eventId: 'dragonLair_treasure',
-        delay: 0,
+        delay: 1,
       }
     ]
   },
@@ -301,7 +291,6 @@ export const dragonLairChain: GameEvent[] = [
     ],
     
     chainId: 'dragonLair',
-    chainStep: 2,
     isChainEnd: true,
     skipNormalEvents: true
   }
