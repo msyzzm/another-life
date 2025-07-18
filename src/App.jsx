@@ -1052,16 +1052,19 @@ function App() {
               ✖
             </button>
             
-            <div className="event-image-container">
-              <img 
-                src={currentEventData.imageUrl} 
-                alt={currentEventData.imageAlt}
-                className="event-image"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            </div>
+            {currentEventData.imageUrl && (
+              <div className="event-image-container">
+                <img 
+                  src={currentEventData.imageUrl} 
+                  alt={currentEventData.imageAlt}
+                  className="event-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
             
             <h3 className="event-title">{currentEventData.title}</h3>
             <hr className="event-divider" />

@@ -25,7 +25,7 @@ export const castleEvents: GameEvent[] =
       }
     ],
     "probability": 1.0,
-    "weight": 10
+    "weight": 1
   },
   {
     "id": "castle_approach",

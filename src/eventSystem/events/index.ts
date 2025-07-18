@@ -21,27 +21,27 @@ import { castleEvents } from './castleEvents';
 
 // 合并所有事件
 export const eventLibrary: GameEvent[] = [
-  // // 基础事件类型
-  // ...battleEvents,           // 战斗事件
-  // ...explorationEvents,      // 探索事件
-  // ...levelUpEvents,          // 升级事件
+  // 基础事件类型
+  ...battleEvents,           // 战斗事件
+  ...explorationEvents,      // 探索事件
+  ...levelUpEvents,          // 升级事件
   
-  // // 角色相关事件
-  // ...socialEvents,           // 社交事件
-  // ...recoveryEvents,         // 恢复事件
-  // ...dailyLifeEvents,        // 日常生活事件
+  // 角色相关事件
+  ...socialEvents,           // 社交事件
+  ...recoveryEvents,         // 恢复事件
+  ...dailyLifeEvents,        // 日常生活事件
   
-  // // 高级事件类型
-  // ...historyEvents,          // 历史感知事件
-  // ...advancedEvents,         // 高级稀有事件
-  // ...specialEvents,          // 特殊事件
+  // 高级事件类型
+  ...historyEvents,          // 历史感知事件
+  ...advancedEvents,         // 高级稀有事件
+  ...specialEvents,          // 特殊事件
   
   // // 事件链
   // ...mysteriousMerchantChain, // 神秘商人事件链
   // ...dragonLairChain,        // 龙穴探险事件链
   
   // 随机事件
-  // ...randomEvents,           // 随机结果事件
+  ...randomEvents,           // 随机结果事件
   ...castleEvents,
 ];
 
