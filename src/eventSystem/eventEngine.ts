@@ -12,6 +12,7 @@ import {
   ErrorSeverity,
   createProcessingError 
 } from './errorHandler';
+import { RandomProcessor } from './randomProcessor';
 
 // 深拷贝工具函数
 function deepClone<T>(obj: T): T {
@@ -277,7 +278,8 @@ export const applyEventOutcome = withErrorHandling(
     // 处理链上下文结果
     if (chainContextOutcomes.length > 0 && chainId) {
       for (const outcome of chainContextOutcomes) {
-        const success = eventChainManager.applyChainContextOutcome(outcome, chainId);
+        const processed = RandomProcessor.resolveRandomOutcome(outcome);
+        const success = eventChainManager.applyChainContextOutcome(processed, chainId);
         if (!success) {
           console.warn(`链上下文结果应用失败: ${outcome.key}`);
         }

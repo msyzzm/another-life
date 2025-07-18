@@ -297,8 +297,13 @@ export async function runAdvancedEventLoop(
       // - 等级要求
       // - 历史条件（如之前发生过某事件）
       // - 事件链条件等
-      triggerableEvents = eventLibrary.filter(event =>
-        canTriggerEvent(event, finalCharacter, finalInventory, historyManager)
+      triggerableEvents = eventLibrary.filter(event =>{
+          // 排除事件链中的除开始事件以外的事件
+          if (event.chainId !== undefined && !event.isChainStart){
+            return false;
+          }
+          return canTriggerEvent(event, finalCharacter, finalInventory, historyManager);
+        }
       );
     }
 
@@ -342,22 +347,22 @@ export async function runAdvancedEventLoop(
       eventsToTrigger = shuffleArray([...triggerableEvents]).slice(0, maxEvents);
     }
 
-    // 步骤6：事件触发保证机制
-    // 如果没有选中任何事件但有可触发事件，强制选择一个
-    // 这确保玩家每天都有事件体验，避免空白无聊的天数
-    console.log(`🔍 选择要触发的事件: ${eventsToTrigger.length} 个事件`);
-    if (guaranteeEvent && eventsToTrigger.length === 0) {
-      // 重新获取所有可触发事件（不进行概率筛选）
-      const allTriggerableEvents = eventLibrary?.filter(event =>
-        canTriggerEvent(event, finalCharacter, finalInventory, historyManager)
-      ) || [];
+    // // 步骤6：事件触发保证机制
+    // // 如果没有选中任何事件但有可触发事件，强制选择一个
+    // // 这确保玩家每天都有事件体验，避免空白无聊的天数
+    // console.log(`🔍 选择要触发的事件: ${eventsToTrigger.length} 个事件`);
+    // if (guaranteeEvent && eventsToTrigger.length === 0) {
+    //   // 重新获取所有可触发事件（不进行概率筛选）
+    //   const allTriggerableEvents = eventLibrary?.filter(event =>
+    //     canTriggerEvent(event, finalCharacter, finalInventory, historyManager)
+    //   ) || [];
       
-      if (allTriggerableEvents.length > 0) {
-        // 从所有可触发事件中随机选择一个，确保有事件发生
-        const randomEvent = allTriggerableEvents[Math.floor(Math.random() * allTriggerableEvents.length)];
-        eventsToTrigger.push(randomEvent);
-      }
-    }
+    //   if (allTriggerableEvents.length > 0) {
+    //     // 从所有可触发事件中随机选择一个，确保有事件发生
+    //     const randomEvent = allTriggerableEvents[Math.floor(Math.random() * allTriggerableEvents.length)];
+    //     eventsToTrigger.push(randomEvent);
+    //   }
+    // }
 
     // 批量触发事件
     const batchResultsArray = triggerEventsBatch(
