@@ -23,7 +23,6 @@ export const initialEvents: GameEvent[] = [
     ],
     probability: 1.0, // 必定触发
     weight: 10,
-    imageUrl: '/images/events/human_warrior.jpg',
   },
   {
     id: 'initial002',
@@ -42,7 +41,6 @@ export const initialEvents: GameEvent[] = [
     ],
     probability: 1.0,
     weight: 10,
-    imageUrl: '/images/events/elf_mage.jpg',
   },
   {
     id: 'initial003',
@@ -61,7 +59,6 @@ export const initialEvents: GameEvent[] = [
     ],
     probability: 1.0,
     weight: 10,
-    imageUrl: '/images/events/dwarf_craftsman.jpg',
   },
   {
     id: 'initial004',
@@ -80,7 +77,6 @@ export const initialEvents: GameEvent[] = [
     ],
     probability: 1.0,
     weight: 10,
-    imageUrl: '/images/events/orc_hunter.jpg',
   },
   {
     id: 'initial005',
@@ -99,6 +95,5 @@ export const initialEvents: GameEvent[] = [
     ],
     probability: 1.0,
     weight: 10,
-    imageUrl: '/images/events/night_elf_rogue.jpg',
   },
 ];
