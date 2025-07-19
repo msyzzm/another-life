@@ -11,6 +11,8 @@ export const initialEvents: GameEvent[] = [
     type: 'initial', // 新的事件类型
     name: '人类战士',
     description: '你是一名人类战士，擅长近身战斗和防御。',
+    imageUrl: '/assets/events/人类战士.png',
+    imageAlt: '人类战士',
     conditions: [], // 无条件，初始事件
     outcomes: [
       { type: 'custom', key: 'setProfession', value: '战士' },
@@ -28,6 +30,8 @@ export const initialEvents: GameEvent[] = [
     type: 'initial',
     name: '精灵法师',
     description: '你是一名精灵法师，擅长魔法和智慧。',
+    imageUrl: '/assets/events/精灵法师.png',
+    imageAlt: '精灵法师',
     conditions: [],
     outcomes: [
       { type: 'custom', key: 'setProfession', value: '法师' },
@@ -45,6 +49,8 @@ export const initialEvents: GameEvent[] = [
     type: 'initial',
     name: '矮人工匠',
     description: '你是一名矮人工匠，擅长制造和耐力。',
+    imageUrl: '/assets/events/矮人工匠.png',
+    imageAlt: '矮人工匠',
     conditions: [],
     outcomes: [
       { type: 'custom', key: 'setProfession', value: '工匠' },
@@ -62,6 +68,8 @@ export const initialEvents: GameEvent[] = [
     type: 'initial',
     name: '兽人猎手',
     description: '你是一名兽人猎手，擅长追踪和狩猎。',
+    imageUrl: '/assets/events/兽人猎手.png',
+    imageAlt: '兽人猎手',
     conditions: [],
     outcomes: [
       { type: 'custom', key: 'setProfession', value: '猎手' },
@@ -79,6 +87,8 @@ export const initialEvents: GameEvent[] = [
     type: 'initial',
     name: '暗夜盗贼',
     description: '你是一名暗夜精灵盗贼，擅长潜行和敏捷动作。',
+    imageUrl: '/assets/events/暗夜盗贼.png',
+    imageAlt: '暗夜盗贼',
     conditions: [],
     outcomes: [
       { type: 'custom', key: 'setProfession', value: '盗贼' },

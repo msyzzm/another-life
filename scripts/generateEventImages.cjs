@@ -153,9 +153,9 @@ function findEventInContent(content, eventName) {
  */
 function generateImagePrompt(eventDescription, eventName) {
   // 基础提示词模板
-  const basePrompt = `Create a fantasy game event illustration for "${eventDescription}".
-Style: Digital art, fantasy game illustration, detailed, atmospheric, suitable for a life simulation RPG game. 
-High quality, professional game art style. Don't include any copyright notice / any watermark / any other text.`;
+  const basePrompt = `颜料的涂抹感+肌理感，丙烯插画，虚实反复穿插，非传统构图的艺术，不要包含任何文字，描绘以下场景：${eventDescription}.
+
+`;
   
   console.log(`🎨 生成的图像提示词: ${basePrompt}`);
   return basePrompt;
@@ -164,11 +164,13 @@ High quality, professional game art style. Don't include any copyright notice / 
 /**
  * 调用图像生成API
  */
-async function generateImage(prompt) {
+async function generateImage(prompt, negativePrompt) {
   return new Promise((resolve, reject) => {
     const requestData = {
       model: CONFIG.IMAGE_CONFIG.model,
       prompt: prompt,
+      negativePrompt: negativePrompt,
+      sample_strength: 0.5
       // 其他参数可以根据需要添加
     };
     
@@ -218,7 +220,7 @@ async function generateImage(prompt) {
           const imageUrl4 = response.data[3].url;
           console.log(`🖼️  图片URL4: ${imageUrl4}`);
           resolve([imageUrl, imageUrl2, imageUrl3, imageUrl4]);
-          resolve(imageUrl);
+          // resolve(imageUrl);
         } catch (error) {
           reject(new Error(`解析API响应失败: ${error.message}`));
         }
@@ -378,11 +380,11 @@ async function main() {
     const prompt = generateImagePrompt(eventInfo.description, eventName);
     
     // 4. 调用图像生成API
-    const imageUrls = await generateImage(prompt);
+    const imageUrls = await generateImage(prompt, "文字");
     
     // 5. 下载图片
     let localImagePath;
-    for(let i = 0; i < imageUrls.length; i++){
+    for(let i = imageUrls.length -1; i >= 0; i--){
       localImagePath = await downloadImage(imageUrls[i], eventName + (i>0?i:''));
     }
 

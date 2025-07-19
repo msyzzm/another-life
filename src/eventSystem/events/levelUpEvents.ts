@@ -11,6 +11,8 @@ export const levelUpEvents: GameEvent[] = [
     type: 'levelUp',
     name: '升级',
     description: '你获得了足够经验，提升了等级！',
+    imageUrl: '/assets/events/升级.png',
+    imageAlt: '升级',
     conditions: [
       { type: 'attribute', key: 'strength', operator: '>=', value: 10 },
       { type: 'attribute', key: 'intelligence', operator: '>=', value: 8 },
@@ -29,6 +31,8 @@ export const levelUpEvents: GameEvent[] = [
     type: 'levelUp',
     name: '突破极限',
     description: '通过不断的训练，你突破了自己的极限！',
+    imageUrl: '/assets/events/突破极限.png',
+    imageAlt: '突破极限',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 3 },
       { type: 'attribute', key: 'stamina', operator: '>=', value: 15 },
@@ -48,6 +52,8 @@ export const levelUpEvents: GameEvent[] = [
     type: 'levelUp',
     name: '智慧觉醒',
     description: '你的智慧达到了新的高度，获得了深刻的洞察力！',
+    imageUrl: '/assets/events/智慧觉醒.png',
+    imageAlt: '智慧觉醒',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 5 },
       { type: 'attribute', key: 'intelligence', operator: '>=', value: 20 },

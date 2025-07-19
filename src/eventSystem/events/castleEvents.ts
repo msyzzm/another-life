@@ -7,7 +7,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_rumors_start",
     "type": "custom",
-    "name": "神秘古堡的传闻",
+    name: "神秘古堡的传闻",
     "description": "酒馆里流传着关于附近一座神秘古堡的传闻，据说那里藏有巨大的财富，但进去的人很少有能回来的...",
     "isChainStart": true,
     "chainId": "mystery_castle",
@@ -25,12 +25,12 @@ export const castleEvents: GameEvent[] =
       }
     ],
     "probability": 1.0,
-    "weight": 1
+    "weight": 100
   },
   {
     "id": "castle_approach",
     "type": "custom",
-    "name": "接近古堡",
+    name: "接近古堡",
     "description": "你来到了古堡外围，高大的城墙和紧闭的大门给人一种不祥的预感。你需要决定如何进入...",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -62,7 +62,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_force_gate",
     "type": "battle",
-    "name": "强行破门",
+    name: "强行破门",
     "description": "你决定用蛮力打开古堡大门。沉重的铁门发出刺耳的摩擦声，惊动了里面的守卫！",
     "chainId": "mystery_castle",
     "conditions": [
@@ -90,7 +90,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_guard_battle",
     "type": "battle",
-    "name": "古堡守卫",
+    name: "古堡守卫",
     "description": "两个全副武装的守卫向你冲来，他们装备精良，看起来训练有素！",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -144,7 +144,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_find_secret_path",
     "type": "custom",
-    "name": "寻找密道",
+    name: "寻找密道",
     "description": "你仔细观察古堡外墙，寻找可能的秘密入口。在一处藤蔓覆盖的地方，你发现了一个隐蔽的小门...",
     conditions:[
       {
@@ -172,7 +172,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_secret_passage",
     "type": "custom",
-    "name": "秘密通道",
+    name: "秘密通道",
     "description": "狭窄的通道内布满了灰尘和蜘蛛网。墙上刻着一些古老的文字，似乎是一个谜题...",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -196,7 +196,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_solve_riddle_success",
     "type": "custom",
-    "name": "解开谜题",
+    name: "解开谜题",
     "description": "你成功解读了墙上的文字，通道尽头的石门缓缓打开，露出一个隐藏的宝箱！",
     conditions: [
       {
@@ -229,7 +229,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_solve_riddle_fail",
     "type": "custom",
-    "name": "无法解开谜题",
+    name: "无法解开谜题",
     "description": "没有头绪，只能回家了！",
     conditions: [
       {
@@ -248,7 +248,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_sneak_in",
     "type": "custom",
-    "name": "潜行进入",
+    name: "潜行进入",
     "description": "你等待守卫换岗的间隙，悄无声息地翻越城墙，成功潜入了古堡内部...",
     conditions: [
       {
@@ -276,7 +276,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_shadows",
     "type": "custom",
-    "name": "阴影中的选择",
+    name: "阴影中的选择",
     "description": "在黑暗中，你发现两个守卫正在交谈。你可以选择暗杀他们，或者等待他们离开...",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -300,7 +300,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_assassinate",
     "type": "custom",
-    "name": "暗杀守卫",
+    name: "暗杀守卫",
     "description": "你悄无声息地接近，迅速解决了两个守卫，没有发出任何声响。",
     conditions: [
       {
@@ -321,6 +321,12 @@ export const castleEvents: GameEvent[] =
         "type": "attributeChange",
         "key": "stamina",
         "value": -2
+      },
+      {
+        type: "chainContext",
+        key: "castle_shadows",
+        value: "castle_main_hall",
+        contextOperation: "set"
       }
     ],
     "nextEvents": [
@@ -333,7 +339,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_wait",
     "type": "custom",
-    "name": "等待时机",
+    name: "等待时机",
     "description": "等待了很久，依然没有机会，只好回家",
     conditions: [
       {
@@ -350,9 +356,15 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_main_hall",
     "type": "custom",
-    "name": "古堡大厅",
+    name: "古堡大厅",
     "description": "你来到了古堡的中央大厅。华丽的装饰已经破败，但仍能看出昔日的辉煌。三条走廊分别通向不同的方向...",
     "conditions": [
+      {
+        "type": "chainContext",
+        "key": "castle_shadows",
+        "operator": "==",
+        "value": "castle_main_hall"
+      },
       {
         "type": "chainContext",
         "key": "castle_guard_battle",
@@ -360,6 +372,7 @@ export const castleEvents: GameEvent[] =
         "value": "castle_main_hall"
       }
     ],
+    conditionLogic: "OR",
     "chainId": "mystery_castle",
     "outcomes": [
       {
@@ -386,7 +399,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_east_wing",
     "type": "custom",
-    "name": "东翼厨房",
+    name: "东翼厨房",
     "description": "这里似乎是古堡的厨房。一个肥胖的厨师正在准备食物，他发现了你！",
     conditions: [
       {
@@ -418,7 +431,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_west_wing",
     "type": "custom",
-    "name": "西翼图书馆",
+    name: "西翼图书馆",
     "description": "满是灰尘的书架上摆满了古老的书籍。其中一本特别的书引起了你的注意...",
     conditions: [
       {
@@ -480,7 +493,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_upstairs",
     "type": "custom",
-    "name": "主人卧室",
+    name: "主人卧室",
     "description": "豪华的卧室中央放着一个华丽的棺材。当你靠近时，棺材盖突然打开！",
     conditions: [
       {
@@ -512,7 +525,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_vampire_battle",
     "type": "battle",
-    "name": "吸血鬼领主",
+    name: "吸血鬼领主",
     "description": "一个面色苍白的贵族从棺材中站起，露出尖锐的獠牙！",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -558,7 +571,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_treasure_room",
     "type": "findItem",
-    "name": "宝藏室",
+    name: "宝藏室",
     "description": "你发现了古堡的宝藏室！金光闪闪的财宝堆满了整个房间。",
     conditions: [
       {
@@ -616,7 +629,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_defeated",
     "type": "custom",
-    "name": "探险失败",
+    name: "探险失败",
     "description": "你被古堡的守卫发现并击败，被扔出了古堡。至少你还活着...",
     conditions: [
       {
@@ -624,7 +637,13 @@ export const castleEvents: GameEvent[] =
         "key": "castle_vampire_battle",
         "operator": "==",
         "value": "castle_defeated"
-      }
+      },
+      {
+        "type": "chainContext",
+        "key": "castle_guard_battle",
+        "operator": "==",
+        "value": "castle_defeated"
+      },
     ],
     "chainId": "mystery_castle",
     "outcomes": [
@@ -644,7 +663,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_give_up",
     "type": "custom",
-    "name": "放弃探险",
+    name: "放弃探险",
     "description": "古堡的阴森气氛让你感到不安，你决定放弃这次冒险。",
     conditions:[
       {
@@ -667,7 +686,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_library_secret",
     "type": "custom",
-    "name": "隐藏的秘密",
+    name: "隐藏的秘密",
     "description": "你发现了一本隐藏的日记，记载着古堡主人的秘密。原来他是一位被诅咒的学者...",
     "chainId": "mystery_castle",
     "outcomes": [
@@ -692,7 +711,7 @@ export const castleEvents: GameEvent[] =
   {
     "id": "castle_vampire_negotiate",
     "type": "custom",
-    "name": "与吸血鬼谈判",
+    name: "与吸血鬼谈判",
     "description": "你用渊博的知识打动了吸血鬼领主，他同意让你带走部分财宝作为不打扰他休息的回报。",
     "chainId": "mystery_castle",
     "outcomes": [

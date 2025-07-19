@@ -11,6 +11,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '神秘商人',
     description: '你遇到了一位神秘商人，他用你的物品换取了更好的装备。',
+    imageUrl: '/assets/events/神秘商人.png',
+    imageAlt: '神秘商人',
     conditions: [
       { type: 'itemCount', key: '史莱姆胶', operator: '>=', value: 2 },
     ],
@@ -26,6 +28,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '遇到友善村民',
     description: '你遇到了一位友善的村民，他分享了一些有用的信息。',
+    imageUrl: '/assets/events/遇到友善村民.png',
+    imageAlt: '遇到友善村民',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 2 },
     ],
@@ -41,6 +45,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '酒馆聚会',
     description: '你在酒馆中与其他冒险者交流，学到了一些有用的技巧。',
+    imageUrl: '/assets/events/酒馆聚会.png',
+    imageAlt: '酒馆聚会',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 3 },
     ],
@@ -57,6 +63,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '帮助迷路的商人',
     description: '你帮助了一位迷路的商人，他给了你一些报酬。',
+    imageUrl: '/assets/events/帮助迷路的商人.png',
+    imageAlt: '帮助迷路的商人',
     conditions: [
       { type: 'attribute', key: 'intelligence', operator: '>=', value: 8 },
     ],
@@ -73,6 +81,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '路遇旅人',
     description: '你在路上遇到了一位友善的旅人，你们互相分享了旅行见闻。',
+    imageUrl: '/assets/events/路遇旅人.png',
+    imageAlt: '路遇旅人',
     conditions: [], // 无条件
     outcomes: [
       { type: 'attributeChange', key: 'intelligence', value: 1 },
@@ -87,6 +97,8 @@ export const socialEvents: GameEvent[] = [
     type: 'custom',
     name: '小镇集市',
     description: '你来到了一个热闹的小镇集市，感受到了人间烟火气。',
+    imageUrl: '/assets/events/小镇集市.png',
+    imageAlt: '小镇集市',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 1 }, // 极低门槛
     ],

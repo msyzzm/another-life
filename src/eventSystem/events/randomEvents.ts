@@ -13,7 +13,7 @@ export const randomEvents: GameEvent[] = [
     type: 'custom',
     name: '随机训练',
     description: '你进行了一次训练，效果因人而异',
-    imageUrl: '/assets/events/随机训练3.png',
+    imageUrl: '/assets/events/随机训练.png',
     imageAlt: '训练场景',
     conditions: [
       { type: 'attribute', key: 'stamina', operator: '>=', value: 3 }

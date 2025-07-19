@@ -11,7 +11,7 @@ export const advancedEvents: GameEvent[] = [
     type: 'custom',
     name: '剑圣的传承',
     description: '传说中的剑圣现身，传授给你无上的剑术。',
-    imageUrl: '/assets/events/剑圣的传承3.png',
+    imageUrl: '/assets/events/剑圣的传承.png',
     imageAlt: '剑圣的传承',
     conditions: [
       { type: 'level', key: 'level', operator: '>=', value: 7 },
